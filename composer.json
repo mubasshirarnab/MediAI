@@ -1,0 +1,1 @@
+{"name": "mubasshirarnab/mediai","description": "Minimal Composer configuration for CI.","type": "library","require": {},"autoload": {"psr-4": {"App\\": "src/"}}}
