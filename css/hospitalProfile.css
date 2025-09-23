@@ -1,0 +1,127 @@
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  background: radial-gradient(ellipse at center, #1e1132 0%, #05020b 100%);
+  color: white;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 48px;
+  font-size: 13px;
+}
+
+nav .logo {
+  font-weight: 700;
+  font-style: italic;
+}
+
+nav .logo span {
+  font-style: normal;
+  color: #c5c5c5;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  cursor: pointer;
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.header img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.header h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.header p {
+  font-size: 13px;
+  color: #c5c5c5;
+  margin: 4px 0;
+}
+
+.form-grid {
+  display: flex;
+  gap: 40px;
+}
+
+.left,
+.right {
+  flex: 1;
+}
+
+h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 6px 16px;
+  background-color: transparent;
+  border: 1px solid #aaa;
+  border-radius: 20px;
+  font-size: 14px;
+  color: white;
+  margin-top: 5px;
+  outline: none;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='white' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+  padding-right: 30px;
+}
+
+.button-container {
+  margin-top: 30px;
+}
+
+button {
+  padding: 6px 20px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  background: linear-gradient(to right, #b150f3, #842edc);
+  box-shadow: 0 0 10px rgba(179, 80, 243, 0.5);
+}

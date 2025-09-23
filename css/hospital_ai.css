@@ -1,0 +1,207 @@
+/* General body styles for hospital_ai.php */
+body {
+    background-color: #000117;
+    color: #E0D8FF;
+    font-family: 'Roboto', sans-serif;
+    margin: 0; /* Reset margin */
+    padding: 0; /* Reset padding */
+    /* Padding-top might be needed if navbar is fixed and has a known height */
+    /* e.g., padding-top: 70px; Adjust based on actual navbar height */
+}
+
+/* Container for the main content of hospital_ai.php */
+.hospital-ai-container {
+    width: 90%;
+    max-width: 800px; /* Adjusted for content width */
+    margin: 20px auto; /* Centering the content, added top margin */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detect-section, .upload-section, .patient-info-section {
+    width: 100%;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detect-section h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.detect-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.detect-btn {
+    background-color: transparent;
+    color: #C9BFFF; /* Light purple text */
+    border: 2px solid #7F00FF; /* Vibrant purple border */
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(127, 0, 255, 0.6); /* Enhanced glow */
+}
+
+.detect-btn:hover {
+    background-color: #7F00FF; /* Vibrant purple background on hover */
+    color: #FFFFFF;
+    box-shadow: 0 0 25px rgba(127, 0, 255, 0.8);
+}
+
+.upload-section {
+    margin-top: 20px;
+}
+
+.upload-area {
+    background-color: rgba(30, 30, 70, 0.3); /* Darker, slightly transparent background */
+    border: 2px dashed #4A3F6D; /* Muted purple dashed border */
+    border-radius: 15px;
+    padding: 50px;
+    text-align: center;
+    width: 70%;
+    max-width: 500px;
+}
+
+.upload-area p {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    color: #B0A8D0; /* Slightly lighter text for better contrast */
+}
+
+.upload-btn {
+    background-color: #554C75; /* Muted grayish-purple */
+    color: #E0D8FF;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 60px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+    background-color: #6A5F8A; /* Lighter shade on hover */
+}
+
+.patient-info-section h3 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 25px;
+}
+
+.patient-info-section form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Distribute space for inputs */
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #FFFFFF; /* White label text */
+    margin-bottom: 8px;
+    padding-left: 10px;
+}
+
+.form-group input[type="text"] {
+    background-color: transparent;
+    border: 1px solid #4A3F6D; /* Muted purple border */
+    border-radius: 20px;
+    padding: 12px 15px;
+    color: #FFFFFF; /* White input text */
+    font-size: 14px;
+}
+
+.form-group input[type="text"]::placeholder {
+    color: #D0D0D0; /* Light grey placeholder text */
+}
+
+.form-group input[type="text"]:focus {
+    outline: none;
+    border-color: #7F00FF; /* Vibrant purple on focus */
+    box-shadow: 0 0 10px rgba(127, 0, 255, 0.5);
+}
+
+.ask-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.ask-btn {
+    background-color: #2A1B5C; /* Dark blue/purple */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 25px;
+    padding: 15px 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 20px rgba(42, 27, 92, 0.8); /* Slightly adjusted shadow */
+}
+
+.ask-btn:hover {
+    background-color: #3B2A7C; /* Lighter shade on hover */
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 768px) {
+    .hospital-ai-container {
+        width: 95%;
+        padding: 10px;
+    }
+    .detect-buttons {
+        flex-direction: column;
+        gap: 15px;
+        width: 90%;
+    }
+    .detect-btn {
+        width: 100%; /* Make buttons full width of their container */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+    .upload-area {
+        width: 90%;
+        padding: 30px;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0; /* Remove gap if stacking */
+    }
+    .form-group {
+        margin-bottom: 20px; /* Add margin between stacked form groups */
+    }
+    .form-group input[type="text"] {
+        width: calc(100% - 32px); /* Adjust width for padding and border */
+    }
+}

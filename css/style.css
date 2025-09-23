@@ -1,0 +1,416 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 150px;
+}
+.mainTitle {
+  color: white;
+  font-size: 64px;
+  font-family: Montserrat;
+  font-weight: 800;
+  line-height: 68px;
+  word-wrap: break-word;
+}
+
+.mainDiscription {
+  color: #5c63f6;
+  font-size: 64px;
+  font-family: Montserrat;
+  font-weight: 800;
+  line-height: 68px;
+  word-wrap: break-word;
+  text-shadow: 0px 0px 13px rgba(46, 55, 255, 0.44);
+}
+.main-layout p {
+  color: #bcbcbc;
+  font-size: 24px;
+  font-family: Montserrat;
+  font-weight: 400;
+  line-height: 34px;
+  word-wrap: break-word;
+  padding-left: 300px;
+  padding-right: 300px;
+  text-align: center;
+}
+
+/* ask ai button */
+@keyframes borderGlow {
+  0% {
+    border-color: #4221ff;
+    box-shadow: 0 0 5.7px 0px #4221ff;
+  }
+  25% {
+    border-color: #6e54ff;
+    box-shadow: 0 0 10px 0px #6e54ff;
+  }
+  50% {
+    border-color: #4221ff;
+    box-shadow: 0 0 5.7px 0px #4221ff;
+  }
+  75% {
+    border-color: #2b15b3;
+    box-shadow: 0 0 10px 0px #2b15b3;
+  }
+  100% {
+    border-color: #4221ff;
+    box-shadow: 0 0 5.7px 0px #4221ff;
+  }
+}
+
+.ask-ai {
+  width: 440px;
+  margin: 0 auto;
+  margin-top: 70px;
+  margin-bottom: 70px;
+  display: flex;
+  height: 60px;
+}
+
+.ask-ai-btn {
+  border-radius: 60px;
+  border: 3.5px solid #4221ff;
+  background: #000117;
+  box-shadow: 0px 0px 5.7px 0px #4221ff;
+  color: #fff;
+  width: 90px;
+  height: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  animation: borderGlow 3s linear infinite;
+  transition: background-color 0.5s ease;
+
+  position: relative;
+  text-decoration: none; /* Remove underline from link */
+  display: flex; /* Enable flex for centering content */
+  align-items: center; /* Center content vertically */
+  justify-content: center; /* Center content horizontally */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.ask-ai-btn:hover {
+  background-color: #1b048d;
+  cursor: pointer;
+}
+
+.ask-ai-text {
+  flex: 1 1 auto;
+  color: #bcbcbc;
+  font-family: "Montserrat-Regular", Helvetica, Arial, sans-serif;
+  font-size: 1.3rem;
+  width: 200px;
+  height: 100%;
+  padding-left: 15px;
+  padding-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 40px 40px 40px 40px;
+  border: 1px solid #ffffff;
+  user-select: none;
+}
+/* ask ai button end */
+.services {
+  padding: 50px 20px;
+}
+
+/* Titles */
+.services-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 48px;
+
+  margin-bottom: 10px;
+}
+
+.services-desc {
+  text-align: center;
+  font-weight: 400;
+  font-size: 20px;
+  color: #bcbcbc;
+  margin-top: 20px;
+  margin-bottom: 70px;
+}
+
+/* Scroll container */
+.scroll {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Flex-track with duplicated content */
+.marquee-track {
+  display: flex;
+  /* width set automatically to accommodate both sets */
+  animation: marquee 20s linear infinite;
+  gap: 30px;
+}
+
+/* Individual service card */
+.service-card {
+  flex: 0 0 auto;
+  border-radius: 10px;
+  width: 280px;
+  padding: 20px;
+  text-align: center;
+}
+
+.service-card h3 {
+  color: #fff;
+}
+
+.service-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.service-desc {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.service-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Seamless infinite animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.number {
+  color: #232abd;
+  font-size: 68px;
+  font-family: Montserrat;
+  font-weight: 800;
+  line-height: 84.08px;
+  word-wrap: break-word;
+}
+.doctors {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+/* Title + subtitle */
+.doctors-title {
+  color: white;
+  font-size: 68px;
+  font-family: Montserrat;
+  font-weight: 800;
+  line-height: 84.08px;
+  word-wrap: break-word;
+}
+.doctors-desc {
+  font-size: 1.25rem;
+  color: #bcbcbc;
+  margin-bottom: 2em;
+}
+
+/* Slider container */
+.doctors-slider {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Flex-list of cards */
+.doctors-list {
+  display: flex;
+  gap: 48px;
+  transition: transform 0.4s ease;
+  will-change: transform;
+}
+
+/* Each card */
+.dr-card {
+  flex: 0 0 410px;
+  background: #090c23;
+  border-radius: 28px;
+  border: 2px solid rgba(46, 55, 255, 0.18);
+  box-shadow: 0 0 0 1.5px #2e37ff40;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.35s, box-shadow 0.35s, border-color 0.3s;
+}
+.dr-card:hover {
+  transform: translateY(-10px) scale(1.025);
+  box-shadow: 0 0 32px 6px rgba(46, 55, 255, 0.5),
+    0 8px 32px rgba(0, 0, 0, 0.25);
+  border-color: #2e37ff;
+  z-index: 1;
+}
+
+/* Image */
+.dr-image {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  filter: grayscale(100%);
+  transition: filter 0.5s;
+}
+.dr-card:hover .dr-image {
+  filter: none;
+}
+
+/* Info block */
+.dr-info {
+  padding: 36px 32px 32px;
+  text-align: left;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.dr-info h3 {
+  font-size: 2.2rem;
+  margin-bottom: 0.25em;
+}
+.dr-role,
+.dr-qual {
+  color: #bcbcbc;
+  margin-bottom: 1.2em;
+  line-height: 1.5;
+  font-size: 1.05rem;
+}
+.dr-special {
+  font-size: 1.05rem;
+  color: #fff;
+  line-height: 1.5;
+}
+
+.doctors-slider {
+  position: relative;
+  /* keep overflow hidden so cards stay framed */
+  overflow: hidden;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.arrow-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.footer {
+  background-color: #000121;
+  color: #fff;
+  padding: 20px 0;
+}
+
+/* Custom Footer Styles */
+
+.footer-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0 32px;
+}
+.footer-logo {
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.footer-about {
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 700px;
+  max-width: 1000px;
+}
+
+.footer-social-contact {
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+}
+
+.footer-social-title {
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 400;
+  margin-bottom: 10px;
+  display: block;
+}
+.footer-social-icons {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  margin-top: 8px;
+}
+.footer-social-icons a {
+  color: #fff;
+  font-size: 1.2rem;
+  transition: color 0.2s, transform 0.2s;
+}
+.footer-social-icons a:hover {
+  color: #6a6aff;
+  transform: scale(1.15);
+}
+.footer-contact {
+  margin-top: 18px;
+}
+.footer-contact-title {
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 400;
+  margin-bottom: 6px;
+  display: block;
+}
+.footer-contact-email {
+  color: #bcbcbc;
+  font-size: 1.08rem;
+  font-weight: 400;
+  margin-top: 2px;
+  display: block;
+}
+@media (max-width: 1100px) {
+  .custom-footer {
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 0 24px 0;
+  }
+  .footer-col {
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    margin-bottom: 24px;
+  }
+  .footer-about {
+    min-width: 0;
+    max-width: 90vw;
+  }
+}
+@media (max-width: 700px) {
+  .custom-footer {
+    flex-direction: column;
+    padding: 32px 0 16px 0;
+  }
+  .footer-logo-text {
+    font-size: 2rem;
+  }
+  .footer-about-desc {
+    font-size: 0.98rem;
+  }
+  .footer-social-icons a {
+    font-size: 1.2rem;
+  }
+}

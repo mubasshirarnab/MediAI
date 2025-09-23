@@ -1,0 +1,22 @@
+[29-Jun-2025 21:47:34 Asia/Dhaka] PHP Fatal error:  Uncaught Error: mysqli object is already closed in C:\xampp\htdocs\MediAI\test_auto_reminder.php:126
+Stack trace:
+#0 C:\xampp\htdocs\MediAI\test_auto_reminder.php(126): mysqli->query('\r\n    SELECT \r\n...')
+#1 {main}
+  thrown in C:\xampp\htdocs\MediAI\test_auto_reminder.php on line 126
+[29-Jun-2025 21:50:36 Asia/Dhaka] PHP Fatal error:  Uncaught Error: mysqli object is already closed in C:\xampp\htdocs\MediAI\test_auto_reminder.php:126
+Stack trace:
+#0 C:\xampp\htdocs\MediAI\test_auto_reminder.php(126): mysqli->query('\r\n    SELECT \r\n...')
+#1 {main}
+  thrown in C:\xampp\htdocs\MediAI\test_auto_reminder.php on line 126
+[29-Jun-2025 21:52:05 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Napa at 21:52:00
+[29-Jun-2025 21:52:05 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-29 21:52:05
+[29-Jun-2025 21:57:10 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Pantonix at 21:57:00
+[29-Jun-2025 21:57:10 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-29 21:57:10
+[30-Jun-2025 10:26:50 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Pantonix at 10:26:00
+[30-Jun-2025 10:26:50 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-30 10:26:50
+[30-Jun-2025 10:26:53 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Pantonix at 10:26:00
+[30-Jun-2025 10:26:53 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-30 10:26:53
+[30-Jun-2025 10:49:51 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Pantonix at 10:49:00
+[30-Jun-2025 10:49:51 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-30 10:49:51
+[30-Jun-2025 13:12:25 Asia/Dhaka] Medication reminder sent successfully to mubasshirahmed263@gmail.com for Pantonix at 13:12:00
+[30-Jun-2025 13:12:25 Asia/Dhaka] Auto medication reminder: 1 reminders sent, 0 errors at 2025-06-30 13:12:25

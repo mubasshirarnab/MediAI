@@ -1,0 +1,389 @@
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    /* Updated background gradient */
+    background: linear-gradient(#000117 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  .container {
+    display: flex;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  
+  .sidebar {
+    width: 420px;
+    min-width: 350px;
+    max-width: 500px;
+    background: #000117;
+    padding: 40px 32px;
+    margin-right: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    z-index: 1;
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  
+  .medicine-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .medicine-form input[type="text"] {
+    background: transparent;
+    border: 1.5px solid #fff;
+    border-radius: 20px;
+    padding: 10px 18px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 24px;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    padding: 18px 12px;
+    background: rgba(160, 132, 238, 0.08);
+    border-radius: 18px;
+    border: 1.5px solid rgba(160, 132, 238, 0.18);
+    box-shadow: 0 2px 12px 0 rgba(160, 132, 238, 0.08);
+    justify-content: space-between;
+  }
+  
+  .custom-radio {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 48px;
+    cursor: pointer;
+    font-size: 1.08rem;
+    user-select: none;
+    transition: all 0.3s ease;
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(160, 132, 238, 0.10);
+    font-weight: 500;
+  }
+  
+  .custom-radio:hover {
+    background: rgba(160, 132, 238, 0.15);
+    border-color: #a084ee;
+    color: #a084ee;
+  }
+  
+  .custom-radio input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 2;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  
+  .radio-btn {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 22px;
+    width: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid #a084ee;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+  
+  .custom-radio input[type="radio"]:checked ~ .radio-btn {
+    background: linear-gradient(135deg, #a084ee, #7a5de4);
+    border: 2px solid #a084ee;
+    box-shadow: 0 0 10px 2px #a084ee44;
+  }
+  
+  .custom-radio input[type="radio"]:checked ~ .radio-btn:after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    animation: radioPulse 0.3s ease;
+  }
+  
+  .btn-group {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn {
+    background: transparent;
+    border: 1.5px solid #fff;
+    color: #bdbdbd; /* less white */
+    border-radius: 20px;
+    padding: 8px 36px; /* broader */
+    min-width: 90px;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  
+  .btn:hover {
+    background: #a084ee;
+    color: #fff;
+    border-color: #a084ee;
+  }
+  
+  .add-btn {
+    background: #a084ee;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 0;
+    width: 100%;
+    font-size: 1rem;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .add-btn:hover {
+    background: #7a5de4;
+  }
+  
+  .divider {
+    width: 2px;
+    background: linear-gradient(to bottom, #2d2346 0%, #a084ee 100%);
+    min-height: 100vh;
+    margin-right: 0;
+    z-index: 2;
+  }
+  
+  .main-content {
+    flex: 1 1 0%;
+    min-width: 0;
+    padding-left: 40px;
+    box-sizing: border-box;
+    z-index: 0;
+  }
+  
+  header {
+    width: 100%;
+    padding: 32px 0 0 0;
+  }
+  
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  nav ul {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  nav ul li {
+    color: #fff;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  
+  nav ul li:hover {
+    color: #a084ee;
+  }
+  
+  .notif {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.7rem;
+    color: #fff;
+    margin-right: 24px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .notif svg {
+    width: 28px;
+    height: 28px;
+    display: block;
+  }
+  
+  .planner {
+    margin-top: 24px;
+  }
+  
+  .user-name {
+    font-weight: bold;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+  }
+  
+  .subtitle {
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #ccc;
+  }
+  
+  .days {
+    display: flex;
+    gap: 24px;
+    margin: 32px 0 24px 0;
+  }
+  
+  .day {
+    background: transparent;
+    border: 2px solid #9747FF;
+    color: #a084ee;
+    border-radius: 24px;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 0 0 #9747FF;
+  }
+  
+  .day.active, .day:focus {
+    background: #a084ee;
+    color: #fff;
+    border: 2px solid #a084ee;
+    outline: none;
+  }
+  
+  .upcoming h3 {
+    font-weight: 400;
+    margin-bottom: 24px;
+    color: #fff;
+  }
+  
+  .dose-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  
+  .dose-card {
+    display: flex;
+    align-items: center;
+    background: rgba(160, 132, 238, 0.08);
+    border: 2px solid #a084ee;
+    border-radius: 24px;
+    padding: 28px 32px;
+    margin-right: 52px;
+    gap: 24px;
+    min-width: 500px;
+    position: relative;
+    box-shadow: 0 0 32px 0 rgba(160, 132, 238, 0.10);
+  }
+  
+  .dose-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .dose-icon img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: brightness(1.2) contrast(1.1);
+  }
+  
+  .dose-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+  
+  .dose-title {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  
+  .dose-title span {
+    font-weight: 400;
+    font-size: 1rem;
+    color: #fff;
+  }
+  
+  .dose-desc {
+    font-size: 1rem;
+    color: #ccc;
+  }
+  
+  .dose-time {
+    font-size: 1rem;
+    color: #bdbdbd; /* grey instead of purple */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  
+  .dose-check {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 16px;
+    border: none;
+    position: relative;
+  }
+  
+  .clock {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" height="18" viewBox="0 0 18 18" width="18" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" fill="none" r="8" stroke="%23a084ee" stroke-width="2"/><path d="M9 5V9L12 11" stroke="%23a084ee" stroke-width="2" stroke-linecap="round"/></svg>') no-repeat center center;
+    background-size: contain;
+  }
