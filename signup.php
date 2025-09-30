@@ -33,7 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Map role values to role_id
     $role_map = array(
       'patient' => 1,
-      'doctor' => 2,
       'hospital' => 3
     );
 
@@ -84,20 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           $stmt = $conn->prepare($insert_patient);
           if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
           $stmt->bind_param("isss", $user_id, $gender, $dob, $address);
-          break;
-
-        case 'doctor':
-          $specialization = $_POST['specialization'];
-          $license_no = $_POST['license_no'];
-
-          if (empty($specialization) || empty($license_no)) {
-            throw new Exception("All doctor information is required");
-          }
-
-          $insert_doctor = "INSERT INTO doctors (user_id, specialization, license_number) VALUES (?, ?, ?)";
-          $stmt = $conn->prepare($insert_doctor);
-          if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-          $stmt->bind_param("iss", $user_id, $specialization, $license_no);
           break;
 
         case 'hospital':
@@ -366,10 +351,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           Patient
         </label>
         <label>
-          <input type="radio" name="accountType" value="doctor" />
-          Doctor
-        </label>
-        <label>
           <input type="radio" name="accountType" value="hospital" />
           Hospital
         </label>
@@ -382,15 +363,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <input type="date" name="dob" placeholder="Date of Birth" />
           <input type="text" name="gender" placeholder="Gender" />
           <input type="text" name="address" placeholder="Address" />
-        </div>
-      </div>
-
-      <!-- Doctor's Information -->
-      <div id="doctorFields" class="hidden">
-        <h2 class="section-title">Doctor's Information</h2>
-        <div class="form-row">
-          <input type="text" name="specialization" placeholder="Specialization" />
-          <input type="text" name="license_no" placeholder="License no." />
         </div>
       </div>
 
@@ -417,8 +389,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     document.addEventListener("DOMContentLoaded", function() {
       const sections = {
         patient: document.getElementById("patientFields"),
-        doctor: document.getElementById("doctorFields"),
-        hospital: document.getElementById("hospitalFields"),
+        hospital: document.getElementById("hospitalFields")
       };
 
       document
