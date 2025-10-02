@@ -244,11 +244,16 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                 <span class="close-btn" onclick="closeModal()">&times;</span>
                 <h2 style="margin-bottom: 20px;">Add New Doctor</h2>
 
-                <button class="generate-btn" onclick="generateCredentials()">
-                    Generate Email & Password
-                </button>
-
                 <form id="addDoctorForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" id="doctorName" required>
+                    </div>
+
+                    <button type="button" class="generate-btn" onclick="generateCredentials()">
+                        Generate Email & Password
+                    </button>
+
                     <div class="form-group">
                         <label>Generated Email</label>
                         <input type="email" id="generatedEmail" readonly>
@@ -257,11 +262,6 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                     <div class="form-group">
                         <label>Generated Password</label>
                         <input type="text" id="generatedPassword" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="name" required>
                     </div>
 
                     <div class="form-group">
@@ -332,9 +332,32 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
 
 
         function generateCredentials() {
-            const timestamp = Date.now().toString().slice(-4);
-            const randomNum = Math.floor(Math.random() * 1000);
-            const email = `doctor${timestamp}${randomNum}@mediai.com`;
+            const fullName = document.getElementById('doctorName').value.trim();
+
+            if (!fullName) {
+                alert('Please enter the doctor\'s name first!');
+                return;
+            }
+
+            // Split the name into parts
+            const nameParts = fullName.toLowerCase().split(' ');
+
+            if (nameParts.length < 2) {
+                alert('Please enter both first and last name!');
+                return;
+            }
+
+            // Get first character of first name and full last name
+            const firstInitial = nameParts[0][0];
+            const lastName = nameParts[nameParts.length - 1];
+
+            // Generate random 4-digit number
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+
+            // Create email
+            const email = `${firstInitial}${lastName}${randomNum}@mediai.com`;
+
+            // Generate random password (8 characters)
             const password = Math.random().toString(36).slice(-8);
 
             document.getElementById('generatedEmail').value = email;
