@@ -2,6 +2,113 @@
 session_start();
 require_once 'dbConnect.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    try {
+        $hospital_id = $_SESSION['user_id'];
+
+
+        $conn->begin_transaction();
+
+
+        $target_dir = "uploads/doctors/";
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
+        $photo = '';
+        if (isset($_FILES["doctor_photo"]) && $_FILES["doctor_photo"]["error"] == 0) {
+            $file_extension = pathinfo($_FILES["doctor_photo"]["name"], PATHINFO_EXTENSION);
+            $photo = uniqid() . "." . $file_extension;
+            $target_file = $target_dir . $photo;
+
+            if ($_FILES["doctor_photo"]["size"] > 5000000) {
+                throw new Exception("Sorry, your file is too large.");
+            }
+
+            $allowed_types = ['jpg', 'jpeg', 'png'];
+            if (!in_array(strtolower($file_extension), $allowed_types)) {
+                throw new Exception("Sorry, only JPG, JPEG & PNG files are allowed.");
+            }
+
+            if (!move_uploaded_file($_FILES["doctor_photo"]["tmp_name"], $target_file)) {
+                throw new Exception("Sorry, there was an error uploading your file.");
+            }
+        }
+
+        $query = "INSERT INTO users (name, email, password, phone, role_id, status, otp) 
+                 VALUES (?, ?, ?, ?, 2, 'authorized', 0)";
+
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            throw new Exception("Error preparing statement: " . $conn->error);
+        }
+
+        $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+        $stmt->bind_param(
+            "ssss",
+            $_POST['name'],
+            $_POST['generatedEmail'],
+            $hashed_password,
+            $_POST['phone']
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("Error inserting user: " . $stmt->error);
+        }
+
+        $doctor_id = $conn->insert_id;
+
+        $query = "INSERT INTO doctor_hospital (doctor_id, hospital_id, created_at) 
+                 VALUES (?, ?, NOW())";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ii", $doctor_id, $hospital_id);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Error linking doctor to hospital: " . $stmt->error);
+        }
+
+
+        $result = $conn->query("SELECT MAX(CAST(license_number AS SIGNED)) as max_license FROM doctors");
+        $row = $result->fetch_assoc();
+        $next_license = ($row['max_license'] ?? 0) + 1;
+
+
+        $query = "INSERT INTO doctors (user_id, specialization, license_number, photo, available) 
+                 VALUES (?, ?, ?, ?, 1)";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param(
+            "isss",
+            $doctor_id,
+            $_POST['specialization'],
+            $next_license,
+            $photo
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("Error inserting doctor details: " . $stmt->error);
+        }
+
+
+        $conn->commit();
+
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success', 'message' => 'Doctor added successfully']);
+        exit;
+    } catch (Exception $e) {
+        $conn->rollback();
+
+        if (isset($target_file) && file_exists($target_file)) {
+            unlink($target_file);
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        exit;
+    }
+}
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] != 'hospital') {
     header("Location: login.php");
@@ -178,8 +285,28 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             border-radius: 15px;
             width: 90%;
             max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .close-btn {
@@ -244,7 +371,7 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                 <span class="close-btn" onclick="closeModal()">&times;</span>
                 <h2 style="margin-bottom: 20px;">Add New Doctor</h2>
 
-                <form id="addDoctorForm">
+                <form id="addDoctorForm" method="POST" action="" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Full Name</label>
                         <input type="text" name="name" id="doctorName" required>
@@ -277,6 +404,11 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                     <div class="form-group">
                         <label>License Number</label>
                         <input type="text" name="license_number" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Doctor's Photo</label>
+                        <input type="file" name="doctor_photo" accept="image/*" required>
                     </div>
 
                     <button type="submit" class="add-doctor-btn" style="width: 100%;">
@@ -339,7 +471,7 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                 return;
             }
 
-            // Split the name into parts
+
             const nameParts = fullName.toLowerCase().split(' ');
 
             if (nameParts.length < 2) {
@@ -347,17 +479,15 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                 return;
             }
 
-            // Get first character of first name and full last name
             const firstInitial = nameParts[0][0];
             const lastName = nameParts[nameParts.length - 1];
 
-            // Generate random 4-digit number
             const randomNum = Math.floor(1000 + Math.random() * 9000);
 
-            // Create email
+
             const email = `${firstInitial}${lastName}${randomNum}@mediai.com`;
 
-            // Generate random password (8 characters)
+
             const password = Math.random().toString(36).slice(-8);
 
             document.getElementById('generatedEmail').value = email;
@@ -377,6 +507,35 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                 window.location.href = `delete_doctor.php?id=${doctorId}`;
             }
         }
+
+        document.getElementById('addDoctorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            formData.append('generatedEmail', document.getElementById('generatedEmail').value);
+            formData.append('password', document.getElementById('generatedPassword').value);
+
+            fetch('manage_doctors.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Doctor added successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: Something went wrong!');
+                });
+        });
     </script>
 </body>
 
