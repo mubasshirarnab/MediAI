@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WI
         $conn->begin_transaction();
 
 
-        $target_dir = "uploads/doctors/";
+        $target_dir = "img/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
@@ -118,9 +118,10 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
 $hospital_id = $_SESSION['user_id'];
 
 
-$query = "SELECT u.id, u.name, u.email, u.phone 
+$query = "SELECT u.id, u.name, u.email, u.phone, d.photo, d.specialization 
           FROM users u 
           JOIN doctor_hospital dh ON u.id = dh.doctor_id 
+          JOIN doctors d ON u.id = d.user_id
           WHERE dh.hospital_id = ? AND u.role_id = 2";
 
 $stmt = $conn->prepare($query);
@@ -353,6 +354,25 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
+
+        .doctor-image {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .doctor-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .doctor-card:hover .doctor-image img {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -428,6 +448,11 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             <?php else: ?>
                 <?php foreach ($doctors as $doctor): ?>
                     <div class="doctor-card">
+                        <?php if ($doctor['photo']): ?>
+                            <div class="doctor-image">
+                                <img src="img/<?php echo htmlspecialchars($doctor['photo']); ?>" alt="Doctor's photo">
+                            </div>
+                        <?php endif; ?>
                         <div class="doctor-info">
                             <div class="doctor-name">Dr. <?php echo htmlspecialchars($doctor['name']); ?></div>
                             <div class="doctor-detail">
