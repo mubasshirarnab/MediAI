@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 02, 2025 at 05:09 PM
+-- Generation Time: Oct 02, 2025 at 10:12 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -295,6 +295,19 @@ CREATE TABLE `doctors` (
 INSERT INTO `doctors` (`user_id`, `specialization`, `license_number`, `photo`, `available`) VALUES
 (4, 'Cardiologist', 'L123MS8', 'portrait-medical-doctor-posing-office-16974063-1902546574.jpg', 1),
 (15, 'Cardiologist', '', 'b-w-dr-image.jpg', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `doctor_hospital`
+--
+
+CREATE TABLE `doctor_hospital` (
+  `id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `hospital_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -764,8 +777,8 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `role_id`, `created_at`, `otp`, `status`) VALUES
 (3, 'Mubasshir Ahmed', 'marnab222263@bscse.uiu.ac.bd', '12345', '01402038323', 3, '2025-04-25 21:44:38', 0, ''),
 (4, 'John Doe', 'john@gmail.com', '12345', '01345678900', 2, '2025-04-25 21:47:06', 0, 'authorized'),
-(5, 'James Anderson', 'james@gmail.com', 'james123', '01234567123', 3, '2025-04-25 22:11:51', 0, ''),
-(6, 'Tom David', 'tomdavid12@gmail.com', '$2y$10$/qX5nsACrHLShjAFVh/IHup6ZJgnNuv49/lH1NqnebkVg5QSMl2G6', '01234567899', 3, '2025-04-28 13:27:34', 0, ''),
+(5, 'James Anderson', 'james@gmail.com', 'james123', '01234567123', 3, '2025-04-25 22:11:51', 0, 'authorized'),
+(6, 'Tom David', 'tomdavid12@gmail.com', '$2y$10$/qX5nsACrHLShjAFVh/IHup6ZJgnNuv49/lH1NqnebkVg5QSMl2G6', '01234567899', 3, '2025-04-28 13:27:34', 0, 'authorized'),
 (7, 'United Hospital', 'unitedmedical56@gmail.com', '$2y$10$OO5KGe.m6J5r0W4R7LNWseDUrp8Y9xvx6SMOF5tk9MkLhUO.nRQO2', '01914001214', 3, '2025-04-28 13:39:58', 0, ''),
 (8, 'Abu Affan', 'aaffan222290@bscse.uiu.ac.bd', '$2y$10$zSu/R8/0McQ8qALNZJ0Vn.IPILvlA51QNJFP/pBlgD4U4uP01y0Iy', '01796651373', 1, '2025-04-28 13:46:31', 0, ''),
 (9, 'Mahdee Arnab', 'arnab0574@gmail.com', '$2y$10$i3GH8Ur.a2yJqqh6TMonO.7g.jP2s2zSORdso2FCfMabwh/xxgDNO', '01751423255', 1, '2025-04-28 16:34:00', 0, 'authorized'),
@@ -891,6 +904,14 @@ ALTER TABLE `disease_predictions`
 --
 ALTER TABLE `doctors`
   ADD PRIMARY KEY (`user_id`);
+
+--
+-- Indexes for table `doctor_hospital`
+--
+ALTER TABLE `doctor_hospital`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `doctor_id` (`doctor_id`),
+  ADD KEY `hospital_id` (`hospital_id`);
 
 --
 -- Indexes for table `expertise`
@@ -1115,6 +1136,12 @@ ALTER TABLE `disease_predictions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `doctor_hospital`
+--
+ALTER TABLE `doctor_hospital`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `expertise`
 --
 ALTER TABLE `expertise`
@@ -1313,6 +1340,13 @@ ALTER TABLE `disease_predictions`
 --
 ALTER TABLE `doctors`
   ADD CONSTRAINT `doctors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `doctor_hospital`
+--
+ALTER TABLE `doctor_hospital`
+  ADD CONSTRAINT `doctor_hospital_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `doctor_hospital_ibfk_2` FOREIGN KEY (`hospital_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `expertise`
