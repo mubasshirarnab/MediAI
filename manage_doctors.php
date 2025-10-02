@@ -40,8 +40,8 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         body {
-            background: #f0f2f5;
-            color: #333;
+            background: #1a1c2e;
+            color: #fff;
             padding: 20px;
         }
 
@@ -55,14 +55,14 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .add-doctor-btn {
-            background: #4CAF50;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             padding: 12px 24px;
             border: none;
@@ -75,8 +75,8 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         .add-doctor-btn:hover {
-            background: #45a049;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
         .doctors-grid {
@@ -86,16 +86,16 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         .doctor-card {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
 
         .doctor-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .doctor-info {
@@ -105,7 +105,7 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         .doctor-name {
             font-size: 1.2rem;
             font-weight: 600;
-            color: #333;
+            color: #fff;
             margin-bottom: 10px;
         }
 
@@ -113,7 +113,7 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 5px;
         }
 
@@ -122,7 +122,7 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
             gap: 10px;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .action-btn {
@@ -139,29 +139,92 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         .edit-btn {
-            background: #2196F3;
+            background: #667eea;
             color: white;
         }
 
         .edit-btn:hover {
-            background: #1976D2;
+            background: #5a6fe0;
         }
 
         .delete-btn {
-            background: #f44336;
+            background: #dc3545;
             color: white;
         }
 
         .delete-btn:hover {
-            background: #d32f2f;
+            background: #c82333;
         }
 
-        .no-doctors {
-            text-align: center;
-            padding: 40px;
-            background: #fff;
-            border-radius: 10px;
-            color: #666;
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1c2e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: #fff;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
     </style>
 </head>
@@ -170,9 +233,57 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
     <div class="container">
         <div class="header">
             <h1>Manage Doctors</h1>
-            <button class="add-doctor-btn" onclick="location.href='add_doctor.php'">
+            <button class="add-doctor-btn" onclick="openModal()">
                 <i class="fas fa-plus"></i> Add New Doctor
             </button>
+        </div>
+
+        <!-- Add Doctor Modal -->
+        <div id="addDoctorModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2 style="margin-bottom: 20px;">Add New Doctor</h2>
+
+                <button class="generate-btn" onclick="generateCredentials()">
+                    Generate Email & Password
+                </button>
+
+                <form id="addDoctorForm">
+                    <div class="form-group">
+                        <label>Generated Email</label>
+                        <input type="email" id="generatedEmail" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Generated Password</label>
+                        <input type="text" id="generatedPassword" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Specialization</label>
+                        <input type="text" name="specialization" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>License Number</label>
+                        <input type="text" name="license_number" required>
+                    </div>
+
+                    <button type="submit" class="add-doctor-btn" style="width: 100%;">
+                        Add Doctor
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="doctors-grid">
@@ -211,6 +322,33 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
+        function openModal() {
+            document.getElementById('addDoctorModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('addDoctorModal').style.display = 'none';
+        }
+
+
+        function generateCredentials() {
+            const timestamp = Date.now().toString().slice(-4);
+            const randomNum = Math.floor(Math.random() * 1000);
+            const email = `doctor${timestamp}${randomNum}@mediai.com`;
+            const password = Math.random().toString(36).slice(-8);
+
+            document.getElementById('generatedEmail').value = email;
+            document.getElementById('generatedPassword').value = password;
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('addDoctorModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+
         function confirmDelete(doctorId) {
             if (confirm('Are you sure you want to remove this doctor?')) {
                 window.location.href = `delete_doctor.php?id=${doctorId}`;
