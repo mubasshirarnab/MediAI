@@ -156,17 +156,19 @@
         </button>
         <button
           class="sidebar-btn"
+          id = "your-groups-btn"
           onclick="window.location.href='groups.php'">
           <img src="icons/yourgroup.svg" alt="Groups" class="sidebar-icon" />
           Your Groups
         </button>
         <button
           class="sidebar-btn"
+          id = "discover-btn"
           onclick="window.location.href='discover.php'">
           <img src="icons/discover.svg" alt="Discover" class="sidebar-icon" />
           Discover
         </button>
-        <button class="sidebar-btn" onclick="window.location.href='createGroup.php'">
+        <button class="sidebar-btn" id = "create-group-btn" onclick="window.location.href='createGroup.php'">
           <img src="icons/createpost.svg" alt="Create" class="sidebar-icon" />
           Create Group
         </button>
