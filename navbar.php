@@ -148,7 +148,6 @@ if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
   </style>
 </head>
 
-<body>
   <header class="navbar">
     <div class="navbar-logo">
       <a href="#">
@@ -160,6 +159,7 @@ if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
       <a href="doctors.php" class="navbar-link">Appointment</a>
       <a href="feed.php" class="navbar-link">Community</a>
       <a href="mediReminder.php" class="navbar-link">Medication Reminder</a>
+      <a href="cabin_booking.php" class="navbar-link">Cabin Booking</a>
       <?php
 
       $profile_link = 'patient_dashboard.php';
