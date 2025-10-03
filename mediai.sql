@@ -23,20 +23,6 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `admins`
---
-
-CREATE TABLE `admins` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `role` varchar(50) NOT NULL,
-  `department` varchar(100) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- --------------------------------------------------------
 
 --
@@ -735,7 +721,7 @@ CREATE TABLE `risk_predictions` (
 
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
-  `role_name` enum('patient','doctor','hospital','admin') NOT NULL
+  `role_name` enum('patient','doctor','hospital') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -745,8 +731,7 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`id`, `role_name`) VALUES
 (1, 'patient'),
 (2, 'doctor'),
-(3, 'hospital'),
-(4, 'admin');
+(3, 'hospital');
 
 -- --------------------------------------------------------
 
@@ -840,12 +825,6 @@ CREATE TABLE `video_meeting` (
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `ai_conversations`
@@ -1287,12 +1266,6 @@ ALTER TABLE `video_meeting`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `admins`
---
-ALTER TABLE `admins`
-  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ai_conversations`
