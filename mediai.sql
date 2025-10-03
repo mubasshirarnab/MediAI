@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2025 at 10:12 AM
+-- Generation Time: Oct 03, 2025 at 12:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -98,6 +98,7 @@ INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `notes`, `phone`, `
 CREATE TABLE `available_hours` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `hospital_id` int(11) DEFAULT NULL,
   `day_of_week` tinyint(4) NOT NULL CHECK (`day_of_week` between 1 and 7),
   `start_time` time NOT NULL,
   `end_time` time NOT NULL
@@ -107,11 +108,11 @@ CREATE TABLE `available_hours` (
 -- Dumping data for table `available_hours`
 --
 
-INSERT INTO `available_hours` (`id`, `user_id`, `day_of_week`, `start_time`, `end_time`) VALUES
-(5, 15, 1, '10:00:00', '19:00:00'),
-(6, 15, 2, '10:00:00', '19:00:00'),
-(7, 15, 3, '10:00:00', '19:00:00'),
-(8, 15, 4, '10:00:00', '19:00:00');
+INSERT INTO `available_hours` (`id`, `user_id`, `hospital_id`, `day_of_week`, `start_time`, `end_time`) VALUES
+(5, 15, NULL, 1, '10:00:00', '19:00:00'),
+(6, 15, NULL, 2, '10:00:00', '19:00:00'),
+(7, 15, NULL, 3, '10:00:00', '19:00:00'),
+(8, 15, NULL, 4, '10:00:00', '19:00:00');
 
 -- --------------------------------------------------------
 
@@ -294,7 +295,9 @@ CREATE TABLE `doctors` (
 
 INSERT INTO `doctors` (`user_id`, `specialization`, `license_number`, `photo`, `available`) VALUES
 (4, 'Cardiologist', 'L123MS8', 'portrait-medical-doctor-posing-office-16974063-1902546574.jpg', 1),
-(15, 'Cardiologist', '', 'b-w-dr-image.jpg', 1);
+(15, 'Cardiologist', '', 'b-w-dr-image.jpg', 1),
+(17, 'Cardiologist', '1', '68de4b0a3b298.jpg', 1),
+(19, 'Skin', '2', '68de4c94373cf.jpg', 1);
 
 -- --------------------------------------------------------
 
@@ -308,6 +311,14 @@ CREATE TABLE `doctor_hospital` (
   `hospital_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `doctor_hospital`
+--
+
+INSERT INTO `doctor_hospital` (`id`, `doctor_id`, `hospital_id`, `created_at`) VALUES
+(1, 17, 7, '2025-10-02 09:51:06'),
+(2, 19, 7, '2025-10-02 09:57:40');
 
 -- --------------------------------------------------------
 
@@ -786,7 +797,9 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `role_id`, `cre
 (13, 'Nuhan', 'abuaffan1123@gmail.com', '$2y$10$3.TGFwA8e.B5lLKpxrftv.pRKQZwfvQQWiFNHutWL13xlBFqK8KUe', '01796651373', 1, '2025-04-28 17:11:51', 473792, 'authorized'),
 (14, 'Shahin Chowdhury', 'schowdhury222152@bscse.uiu.ac.bd', '$2y$10$vPtPxs8BvW4JJxCWGgJJEeHruuG/m6Gtb2hYr9jdaSrE7sucWlEVa', '01319312217', 1, '2025-04-29 17:28:05', 141920, 'authorized'),
 (15, 'Abu Affan', 'maffan222290@bscse.uiu.ac.bd', '$2y$10$WsTvFcuAJsqa8Q12vUJ4Xuh6CuSiqnVmAVqqzMTeeAIZVJcsUhTWK', '01796651373', 2, '2025-05-08 18:52:46', 534711, 'authorized'),
-(16, 'Mahdee Arnab', 'mubasshirahmed263@gmail.com', '$2y$10$whzhyLxgabPfVKC/.2gaUuRGIWmVSlvjzajHZRCCNyxTKgU3k3VBC', '01751423255', 1, '2025-06-23 09:12:02', 415621, 'authorized');
+(16, 'Mahdee Arnab', 'mubasshirahmed263@gmail.com', '$2y$10$whzhyLxgabPfVKC/.2gaUuRGIWmVSlvjzajHZRCCNyxTKgU3k3VBC', '01751423255', 1, '2025-06-23 09:12:02', 415621, 'authorized'),
+(17, 'John Smith', 'jsmith4250@mediai.com', '$2y$10$enzdtXnFsN9GDDXovFmA7ONRjo60K89QGACVfpN//b/vlKQtbnuYW', '01700000000', 2, '2025-10-02 09:51:06', 0, 'authorized'),
+(19, 'Nurul Huda', 'nhuda2137@mediai.com', '$2y$10$StfKW8uY5zOAARdrJj0JsuCXcSFsOEZdPCiq/HMCZiUBNlpn14XCu', '01811111111', 2, '2025-10-02 09:57:40', 0, 'authorized');
 
 -- --------------------------------------------------------
 
@@ -845,7 +858,8 @@ ALTER TABLE `appointments`
 --
 ALTER TABLE `available_hours`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `fk_available_hours_hospital` (`hospital_id`);
 
 --
 -- Indexes for table `bills`
@@ -1139,7 +1153,7 @@ ALTER TABLE `disease_predictions`
 -- AUTO_INCREMENT for table `doctor_hospital`
 --
 ALTER TABLE `doctor_hospital`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `expertise`
@@ -1247,7 +1261,7 @@ ALTER TABLE `time_for_meeting`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `video_consultations`
@@ -1288,7 +1302,8 @@ ALTER TABLE `appointments`
 -- Constraints for table `available_hours`
 --
 ALTER TABLE `available_hours`
-  ADD CONSTRAINT `available_hours_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `doctors` (`user_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `available_hours_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `doctors` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_available_hours_hospital` FOREIGN KEY (`hospital_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `bills`
