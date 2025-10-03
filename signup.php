@@ -33,7 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Map role values to role_id
     $role_map = array(
       'patient' => 1,
-      'hospital' => 3
+      'hospital' => 3,
+      'admin' => 4
     );
 
     if (!isset($role_map[$account_type])) {
@@ -97,6 +98,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           $stmt = $conn->prepare($insert_hospital);
           if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
           $stmt->bind_param("isss", $user_id, $full_name, $reg_no, $hospital_address);
+          break;
+
+        case 'admin':
+          $admin_role = $_POST['admin_role'];
+          $admin_department = $_POST['admin_department'];
+
+          if (empty($admin_role) || empty($admin_department)) {
+            throw new Exception("All admin information is required");
+          }
+
+          $insert_admin = "INSERT INTO admins (user_id, role, department) VALUES (?, ?, ?)";
+          $stmt = $conn->prepare($insert_admin);
+          if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
+          $stmt->bind_param("iss", $user_id, $admin_role, $admin_department);
           break;
       }
 
@@ -354,6 +369,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <input type="radio" name="accountType" value="hospital" />
           Hospital
         </label>
+        <label>
+          <input type="radio" name="accountType" value="admin" />
+          Admin
+        </label>
       </div>
 
       <!-- Patient's Information -->
@@ -375,6 +394,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
       </div>
 
+      <!-- Admin's Information -->
+      <div id="adminFields" class="hidden">
+        <h2 class="section-title">Admin's Information</h2>
+        <div class="form-row">
+          <input type="text" name="admin_role" placeholder="Admin Role" />
+          <input type="text" name="admin_department" placeholder="Department" />
+        </div>
+      </div>
+
       <!-- Submit -->
       <div class="sub" style="display: flex; justify-content: space-between">
         <button type="submit" class="btn">Sign Up</button>
@@ -389,7 +417,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     document.addEventListener("DOMContentLoaded", function() {
       const sections = {
         patient: document.getElementById("patientFields"),
-        hospital: document.getElementById("hospitalFields")
+        hospital: document.getElementById("hospitalFields"),
+        admin: document.getElementById("adminFields")
       };
 
       document
