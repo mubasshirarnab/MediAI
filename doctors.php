@@ -447,7 +447,7 @@ if ($selected_id) {
     .custom-sidebar {
       background: #07081a;
       min-height: 76vh;
-      padding: 0 0 0 0;
+      padding-left: 50px;
       border-radius: 0 20px 20px 0;
       box-shadow: none;
       border: none;
