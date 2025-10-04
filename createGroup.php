@@ -206,7 +206,7 @@
           <img src="icons/discover.svg" alt="Discover" class="sidebar-icon" />
           Discover
         </button>
-        <button class="sidebar-btn" onclick="window.location.href='createGroup.php'">
+        <button class="sidebar-btn" id="createGroupBtn" onclick="window.location.href='createGroup.php'">
           <img src="icons/createpost.svg" alt="Create" class="sidebar-icon" />
           Create Group
         </button>
@@ -231,7 +231,7 @@
             <label for="communityPhoto">Community Photo</label>
             <input type="file" id="communityPhoto" name="photo" accept="image/*" />
           </div>
-          <button type="submit" class="create-btn">Create Community</button>
+          <button type="submit" class="create-btn" id="createCommunityBtn">Create Community</button>
         </form>
       </div>
     </main>
