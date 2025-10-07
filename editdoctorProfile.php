@@ -120,31 +120,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle Availability Schedule
     if (isset($_POST['schedule'])) {
       $schedule = json_decode($_POST['schedule'], true);
-      if (is_array($schedule)) {
-        // Get hospital_id from the schedule
-        $hospital_id = $schedule[0]['hospital_id'] ?? null;
-
-        if ($hospital_id) {
-          // Delete existing schedule for this doctor and hospital
+      if (is_array($schedule) && count($schedule) > 0) {
+        $hospital_id = isset($schedule[0]['hospital_id']) ? (int)$schedule[0]['hospital_id'] : 0;
+        if ($hospital_id > 0) {
+          // Remove only existing slots for this doctor+hospital
           $stmt = $conn->prepare("DELETE FROM available_hours WHERE user_id = ? AND hospital_id = ?");
           $stmt->bind_param("ii", $user_id, $hospital_id);
           $stmt->execute();
 
-          // Insert new schedule
-          $stmt = $conn->prepare("INSERT INTO available_hours (user_id, hospital_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
+          // Prepare insert
+          $ins = $conn->prepare("INSERT INTO available_hours (user_id, hospital_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
 
           foreach ($schedule as $slot) {
-            if (!empty($slot['start_time']) && !empty($slot['end_time'])) {
-              $stmt->bind_param(
-                "iiiss",
-                $user_id,
-                $hospital_id,
-                $slot['day_of_week'],
-                $slot['start_time'],
-                $slot['end_time']
-              );
-              $stmt->execute();
+            if (empty($slot['start_time']) || empty($slot['end_time']) || !isset($slot['day_of_week'])) {
+              continue;
             }
+
+            // Normalize day_of_week: UI may send 0..6 (Sun..Sat) or 1..7
+            $day = intval($slot['day_of_week']);
+            if ($day >= 0 && $day <= 6) {
+              $db_day = $day + 1; // convert 0..6 -> 1..7
+            } elseif ($day >= 1 && $day <= 7) {
+              $db_day = $day;
+            } else {
+              // invalid day value
+              continue;
+            }
+
+            // Normalize times to HH:MM:SS
+            $start = trim($slot['start_time']);
+            $end = trim($slot['end_time']);
+            if (preg_match('/^\d{1,2}:\d{2}$/', $start)) $start .= ':00';
+            if (preg_match('/^\d{1,2}:\d{2}$/', $end)) $end .= ':00';
+
+            // Basic validation of time format (HH:MM:SS)
+            if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $start) || !preg_match('/^\d{2}:\d{2}:\d{2}$/', $end)) {
+              continue;
+            }
+
+            // Final bind & execute
+            $ins->bind_param("iiiss", $user_id, $hospital_id, $db_day, $start, $end);
+            $ins->execute();
           }
         }
       }
@@ -378,10 +394,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <h3>Education</h3>
           <div id="degree-list"></div>
           <div class="degree-inputs">
-            <input required type="text" id="degree" placeholder="Degree" />
-            <input required type="text" id="institute" placeholder="Institute" />
-            <input required type="text" id="discipline" placeholder="Discipline" />
-            <input required type="text" id="year" placeholder="Year" class="small-input" />
+            <input type="text" id="degree" placeholder="Degree" />
+            <input type="text" id="institute" placeholder="Institute" />
+            <input type="text" id="discipline" placeholder="Discipline" />
+            <input type="text" id="year" placeholder="Year" class="small-input" />
             <button type="button" id="add-degree">+ Add Degree</button>
           </div>
 
