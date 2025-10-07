@@ -57,13 +57,24 @@ if ($selected_id) {
     $qualifications[] = $row;
   }
 }
+
+// Fetch current user details for pre-filling the appointment form
+if (isset($_SESSION['user_id'])) {
+  $cu_id = (int) $_SESSION['user_id'];
+  $cu_stmt = $conn->prepare("SELECT name, email, phone FROM users WHERE id = ?");
+  $cu_stmt->bind_param("i", $cu_id);
+  $cu_stmt->execute();
+  $currentUser = $cu_stmt->get_result()->fetch_assoc();
+} else {
+  $currentUser = null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Doctors | MEDIAi</title>
   <!-- <link rel="stylesheet" href="css/doctors.css" /> -->
   <link
@@ -652,15 +663,79 @@ if ($selected_id) {
         transform: rotate(360deg);
       }
     }
+
+    /* minimal calendar styles to match existing theme */
+    #calendarContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cal-day {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #0f1330;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .cal-available {
+      box-shadow: 0 6px 18px rgba(66, 33, 255, 0.08);
+      border-color: #667eea;
+    }
+
+    .cal-unavailable {
+      opacity: 0.35;
+      background: #0a0c1a;
+      cursor: not-allowed;
+    }
+
+    /* ensure calendar area is visible and buttons readable */
+    #calendarContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      min-height: 48px;
+    }
+
+    .cal-day {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #0f1330;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .cal-day[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .cal-available {
+      box-shadow: 0 6px 18px rgba(66, 33, 255, 0.08);
+      border-color: #667eea;
+    }
+
+    .cal-unavailable {
+      background: #0a0c1a;
+    }
   </style>
 </head>
 
 <body>
   <iframe src="navbar.php" frameborder="0" style="width: 100%; height: 70px;"></iframe>
-  <?php
+  <?php include_once 'navbar.php'; ?>
 
-  include_once 'navbar.php';
-  ?>
+  <!-- inject JS currentUser for client-side prefill / use -->
+  <script>
+    const currentUser = <?php echo json_encode($currentUser ?? null, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG); ?>;
+  </script>
+
   <div class="doctors-main-layout">
     <!-- Left Sidebar: Doctors List -->
     <aside class="doctors-sidebar custom-sidebar">
@@ -723,7 +798,7 @@ if ($selected_id) {
     </main>
   </div>
 
-  <!-- Appointment Booking Modal -->
+  <!-- Appointment Booking Modal (modified) -->
   <div id="appointmentModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeAppointmentModal()">&times;</span>
@@ -732,25 +807,38 @@ if ($selected_id) {
         <input type="hidden" id="doctor_id" name="doctor_id">
 
         <div class="form-group">
+          <label for="hospital_select">Select Hospital</label>
+          <select id="hospital_select" name="hospital_id" required>
+            <option value="">Loading hospitals...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="full_name">Full Name</label>
-          <input type="text" id="full_name" name="full_name" required>
+          <input type="text" id="full_name" name="full_name" required
+            value="<?php echo isset($currentUser['name']) ? htmlspecialchars($currentUser['name']) : ''; ?>">
         </div>
 
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" required>
+          <input type="tel" id="phone" name="phone" required
+            value="<?php echo isset($currentUser['phone']) ? htmlspecialchars($currentUser['phone']) : ''; ?>">
         </div>
 
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" name="email" required
+            value="<?php echo isset($currentUser['email']) ? htmlspecialchars($currentUser['email']) : ''; ?>">
         </div>
 
         <div class="form-group">
-          <label for="appointment_day">Preferred Day</label>
-          <select id="appointment_day" name="appointment_day" required>
-            <option value="">Select Day</option>
-          </select>
+          <label>Preferred Date</label>
+          <div id="calendarContainer" style="margin-bottom:8px"></div>
+
+          <!-- removed visible select as requested; keep hidden field(s) so backend gets the day/date -->
+          <input type="hidden" id="appointment_day" name="appointment_day" required>
+          <input type="hidden" id="appointment_date" name="appointment_date">
+          <div id="selectedDateDisplay" style="color:#bdbdbd; margin-top:8px; font-size:0.95rem;"></div>
         </div>
 
         <div class="form-group">
@@ -777,130 +865,178 @@ if ($selected_id) {
   </div>
 
   <script>
-    // Get current user information from session
-    let currentUser = null;
-    <?php if (isset($_SESSION['user_id'])): ?>
-      <?php
-      // Get phone number from database
-      $phone_number = '';
-      if (isset($_SESSION['user_id'])) {
-        $phone_query = "SELECT phone FROM users WHERE id = ?";
-        $phone_stmt = $conn->prepare($phone_query);
-        $phone_stmt->bind_param("i", $_SESSION['user_id']);
-        $phone_stmt->execute();
-        $phone_result = $phone_stmt->get_result();
-        if ($phone_row = $phone_result->fetch_assoc()) {
-          $phone_number = $phone_row['phone'];
-        }
-      }
-      ?>
-      currentUser = {
-        id: <?php echo $_SESSION['user_id']; ?>,
-        name: '<?php echo htmlspecialchars($_SESSION['full_name'] ?? ''); ?>',
-        email: '<?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?>',
-        phone: '<?php echo htmlspecialchars($phone_number); ?>'
-      };
-    <?php endif; ?>
+    /* --- booking JS: hospital dropdown, calendar, day/time population --- */
 
     function openAppointmentModal(doctorId, doctorName) {
       document.getElementById('doctor_id').value = doctorId;
       document.getElementById('appointmentModal').style.display = 'block';
 
-      // Pre-fill user information if available
-      if (currentUser) {
-        document.getElementById('full_name').value = currentUser.name;
-        document.getElementById('email').value = currentUser.email;
-        document.getElementById('phone').value = currentUser.phone;
+      // prefill user info if currentUser exists
+      if (typeof currentUser !== 'undefined' && currentUser) {
+        document.getElementById('full_name').value = currentUser.name || '';
+        document.getElementById('email').value = currentUser.email || '';
+        document.getElementById('phone').value = currentUser.phone || '';
       }
 
-      // Load available dates and times
-      loadAvailableDates(doctorId);
+      // load hospitals for this doctor and reset UI
+      loadHospitalsForDoctor(doctorId);
     }
 
     function closeAppointmentModal() {
       document.getElementById('appointmentModal').style.display = 'none';
       document.getElementById('appointmentForm').reset();
+      document.getElementById('calendarContainer').innerHTML = '';
+      document.getElementById('appointment_time').innerHTML = '<option value="">Select Time</option>';
+      document.getElementById('appointment_day').value = '';
+      document.getElementById('appointment_date').value = '';
+      document.getElementById('selectedDateDisplay').textContent = '';
     }
 
-    // Close modal when clicking outside
     window.onclick = function(event) {
       const modal = document.getElementById('appointmentModal');
-      if (event.target === modal) {
-        closeAppointmentModal();
-      }
+      if (event.target === modal) closeAppointmentModal();
     }
 
-    function loadAvailableDates(doctorId) {
-      fetch(`get_available_slots.php?doctor_id=${doctorId}`)
-        .then(response => response.json())
+    function loadHospitalsForDoctor(doctorId) {
+      const sel = document.getElementById('hospital_select');
+      const calendar = document.getElementById('calendarContainer');
+      const selectedDisplay = document.getElementById('selectedDateDisplay');
+      sel.innerHTML = '<option value="">Loading hospitals...</option>';
+      calendar.innerHTML = '';
+      selectedDisplay.textContent = '';
+
+      fetch(`get_doctor_hospitals.php?doctor_id=${encodeURIComponent(doctorId)}`)
+        .then(r => r.json())
         .then(data => {
-          const daySelect = document.getElementById('appointment_day');
-          const timeSelect = document.getElementById('appointment_time');
-
-          // Clear existing options
-          daySelect.innerHTML = '<option value="">Select Day</option>';
-          timeSelect.innerHTML = '<option value="">Select Time</option>';
-
-          if (data.success && data.available_days) {
-            // Populate days
-            data.available_days.forEach(day => {
-              const option = document.createElement('option');
-              option.value = day.day_number;
-              option.textContent = day.day_name;
-              daySelect.appendChild(option);
-            });
+          sel.innerHTML = '<option value="">Select Hospital</option>';
+          if (!Array.isArray(data) || data.length === 0) {
+            sel.innerHTML = '<option value="">No associated hospitals</option>';
+            // show message in calendar area
+            calendar.innerHTML = '<div style="color:#ccc">Doctor is not associated with any hospital.</div>';
+            return;
           }
+          data.forEach(h => {
+            const opt = document.createElement('option');
+            opt.value = h.id;
+            opt.textContent = h.name;
+            sel.appendChild(opt);
+          });
+
+          // auto-select the first hospital to immediately show calendar (helpful for testing)
+          // remove this behavior if you prefer manual selection
+          sel.value = data[0].id;
+          sel.dispatchEvent(new Event('change'));
         })
-        .catch(error => {
-          console.error('Error loading available days:', error);
+        .catch(err => {
+          console.error('Error loading hospitals', err);
+          sel.innerHTML = '<option value="">Unable to load hospitals</option>';
+          document.getElementById('calendarContainer').innerHTML = '<div style="color:#f66">Failed to load availability.</div>';
         });
+
+      sel.onchange = function() {
+        const hospitalId = this.value;
+        // clear previous selections
+        document.getElementById('appointment_day').value = '';
+        document.getElementById('appointment_date').value = '';
+        document.getElementById('selectedDateDisplay').textContent = '';
+        document.getElementById('appointment_time').innerHTML = '<option value="">Select Time</option>';
+        document.getElementById('calendarContainer').innerHTML = '';
+
+        if (!hospitalId) return;
+
+        const doctorId = document.getElementById('doctor_id').value;
+        fetch(`get_available_slots.php?doctor_id=${doctorId}&hospital_id=${hospitalId}`)
+          .then(r => r.json())
+          .then(resp => {
+            if (!resp.success) {
+              document.getElementById('calendarContainer').innerHTML = '<div style="color:#ccc">' + (resp.message || 'No availability found') + '</div>';
+              window.__available_time_map = {};
+              return;
+            }
+
+            // render calendar and keep time map
+            renderCalendar(resp.available_days);
+            window.__available_time_map = resp.time_map || {};
+          })
+          .catch(err => {
+            console.error('Error fetching availability', err);
+            document.getElementById('calendarContainer').innerHTML = '<div style="color:#f66">Error loading availability</div>';
+          });
+      };
     }
 
-    // Load time slots when day is selected
-    document.getElementById('appointment_day').addEventListener('change', function() {
-      const doctorId = document.getElementById('doctor_id').value;
-      const selectedDay = this.value;
-      const timeSelect = document.getElementById('appointment_time');
+    // render a small 14-day calendar, highlight available dates
+    function renderCalendar(available_days) {
+      const container = document.getElementById('calendarContainer');
+      container.innerHTML = '';
+      const now = new Date();
+      const daysToShow = 14;
+      const availJsSet = new Set((available_days || []).map(d => Number(d.day_js))); // 0..6
 
-      if (selectedDay) {
-        fetch(`get_available_slots.php?doctor_id=${doctorId}&selected_day=${selectedDay}`)
-          .then(response => response.json())
-          .then(data => {
-            timeSelect.innerHTML = '<option value="">Select Time</option>';
-
-            if (data.success && data.time_slots) {
-              data.time_slots.forEach(slot => {
-                const option = document.createElement('option');
-                option.value = slot.time;
-                option.textContent = slot.time_formatted;
-                timeSelect.appendChild(option);
-              });
-            }
-          })
-          .catch(error => {
-            console.error('Error loading time slots:', error);
-          });
+      if (!available_days || available_days.length === 0) {
+        container.innerHTML = '<div style="color:#ccc">No available days for selected hospital.</div>';
+        return;
       }
-    });
 
-    // Handle form submission
+      for (let i = 0; i < daysToShow; i++) {
+        const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+        const dayIdx = dt.getDay(); // 0..6
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cal-day';
+        btn.dataset.date = dt.toISOString().slice(0, 10);
+        btn.dataset.dayJs = dayIdx;
+        btn.textContent = dt.toLocaleDateString(undefined, {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
+        });
+
+        if (availJsSet.has(dayIdx)) {
+          btn.classList.add('cal-available');
+          btn.onclick = function() {
+            const dbDay = dayIdx + 1; // DB uses 1..7
+            document.getElementById('appointment_day').value = dbDay;
+            document.getElementById('appointment_date').value = btn.dataset.date;
+            document.getElementById('selectedDateDisplay').textContent = 'Selected: ' + dt.toLocaleDateString();
+            populateTimesForDay(dbDay);
+          };
+        } else {
+          btn.classList.add('cal-unavailable');
+          btn.disabled = true;
+        }
+        container.appendChild(btn);
+      }
+    }
+
+    // populate times dropdown from global time map
+    function populateTimesForDay(day_db) {
+      const timeSel = document.getElementById('appointment_time');
+      timeSel.innerHTML = '<option value="">Select Time</option>';
+      const map = window.__available_time_map || {};
+      const slots = map[day_db] || [];
+      slots.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t; // time string e.g. "09:30:00" or "09:30"
+        opt.textContent = t.length === 8 ? t.slice(0, 5) : t; // show HH:MM
+        timeSel.appendChild(opt);
+      });
+    }
+
+    /* form submission remains same as before */
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
       e.preventDefault();
-
       const submitBtn = this.querySelector('.submit-btn');
       const originalText = submitBtn.textContent;
-
-      // Show loading state
       submitBtn.innerHTML = '<span class="loading"></span>Booking Appointment...';
       submitBtn.disabled = true;
 
       const formData = new FormData(this);
-
       fetch('book_appointment.php', {
           method: 'POST',
           body: formData
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
           if (data.success) {
             alert('Appointment booked successfully!');
@@ -909,17 +1045,18 @@ if ($selected_id) {
             alert('Error: ' + (data.message || 'Failed to book appointment'));
           }
         })
-        .catch(error => {
-          console.error('Error:', error);
+        .catch(err => {
+          console.error(err);
           alert('Error: Failed to book appointment');
         })
         .finally(() => {
-          // Reset button
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
         });
     });
   </script>
+
+  <!-- keep rest of doctors.php below -->
 </body>
 
 </html>
