@@ -122,11 +122,18 @@
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [q, setQ] = useState('');
+    const [hasReports, setHasReports] = useState(false);
+    const [typingTimer, setTypingTimer] = useState(null);
 
-    const load = async () => {
+    const load = async (opts={}) => {
+      const { q: q1 = q, has_reports: hr = hasReports } = opts;
       try {
         setLoading(true); setError('');
-        const res = await axios.get('lab_reports_api.php', { params: { action: 'patients_list' }});
+        const params = { action: 'patients_list' };
+        if (q1 && q1.trim()) params.q = q1.trim();
+        if (hr) params.has_reports = 1;
+        const res = await axios.get('lab_reports_api.php', { params });
         if (res.data.success) setPatients(res.data.data); else setError(res.data.error || 'Failed to load');
       } catch (e) { setError('Failed to load'); }
       finally { setLoading(false); }
@@ -134,11 +141,29 @@
 
     useEffect(() => { load(); }, []);
 
+    const onQChange = (e)=>{
+      const v = e.target.value; setQ(v);
+      if (typingTimer) clearTimeout(typingTimer);
+      setTypingTimer(setTimeout(()=> load({ q: v }), 350));
+    };
+
+    const onHasReports = (e)=>{
+      const v = e.target.checked; setHasReports(v); load({ has_reports: v });
+    };
+
     return React.createElement('div', null, [
       React.createElement('div', { key:'hdr', className:'header' }, [
         React.createElement('div', { key:'t', className:'title' }, 'Report Upload'),
-        React.createElement('button', { key:'r', className:'btn', onClick:load, disabled:loading }, loading ? 'Loading…' : 'Refresh')
+        React.createElement('div', { key:'filters', style:{ display:'flex', gap:'10px', alignItems:'center' } }, [
+          React.createElement('input', { key:'q', placeholder:'Search by name, email, or ID…', value:q, onChange:onQChange, style:{ minWidth:'280px' } }),
+          React.createElement('label', { key:'hr', style:{ display:'flex', alignItems:'center', gap:'6px' } }, [
+            React.createElement('input', { type:'checkbox', checked:hasReports, onChange:onHasReports }),
+            'Has reports'
+          ]),
+          React.createElement('button', { key:'r', className:'btn', onClick:()=>load(), disabled:loading }, loading ? 'Loading…' : 'Refresh')
+        ])
       ]),
+      React.createElement('div', { key:'meta', style:{ color:'#9aa', margin:'6px 0' } }, `Results: ${patients.length}`),
       error ? React.createElement('div', { key:'err', className:'error' }, error) : null,
       patients.map(p => React.createElement(PatientRow, { key:p.patient_id, patient:p }))
     ]);

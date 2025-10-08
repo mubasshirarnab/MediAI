@@ -72,8 +72,50 @@ try {
         case 'patients_list':
             require_method('GET');
             if (!is_authenticated() || !is_hospital()) send_json(['success' => false, 'error' => 'Unauthorized'], 401);
-            $sql = "SELECT p.user_id as patient_id, u.name, u.email FROM patients p JOIN users u ON p.user_id = u.id ORDER BY u.name ASC";
-            $res = $conn->query($sql);
+
+            $q = trim($_GET['q'] ?? '');
+            $has_reports = isset($_GET['has_reports']) && $_GET['has_reports'] == '1';
+
+            // Base query
+            $sql = "SELECT p.user_id as patient_id, u.name, u.email
+                    FROM patients p JOIN users u ON p.user_id = u.id";
+            $conds = [];
+            $types = '';
+            $params = [];
+
+            if ($has_reports) {
+                $sql .= " INNER JOIN (SELECT DISTINCT patient_id FROM lab_reports) lr ON lr.patient_id = p.user_id";
+            }
+
+            if ($q !== '') {
+                // If numeric, allow matching exact id as well
+                if (ctype_digit($q)) {
+                    $conds[] = "(u.id = ? OR u.name LIKE ? OR u.email LIKE ?)";
+                    $types .= 'iss';
+                    $params[] = intval($q);
+                    $like = '%' . $q . '%';
+                    $params[] = $like; $params[] = $like;
+                } else {
+                    $conds[] = "(u.name LIKE ? OR u.email LIKE ?)";
+                    $types .= 'ss';
+                    $like = '%' . $q . '%';
+                    $params[] = $like; $params[] = $like;
+                }
+            }
+
+            if ($conds) { $sql .= ' WHERE ' . implode(' AND ', $conds); }
+            $sql .= ' ORDER BY u.name ASC LIMIT 200';
+
+            if ($types) {
+                $stmt = $conn->prepare($sql);
+                if (!$stmt) send_json(['success' => false, 'error' => $conn->error], 500);
+                $stmt->bind_param($types, ...$params);
+                $stmt->execute();
+                $res = $stmt->get_result();
+            } else {
+                $res = $conn->query($sql);
+            }
+
             $rows = [];
             if ($res) while ($r = $res->fetch_assoc()) { $rows[] = $r; }
             send_json(['success' => true, 'data' => $rows]);
