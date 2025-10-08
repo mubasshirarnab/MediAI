@@ -37,6 +37,38 @@ while ($row = $appt_result->fetch_assoc()) {
     $appointments[] = $row;
 }
 
+// Ensure lab_reports table exists and load patient's lab reports
+$reports = [];
+try {
+    $conn->query("CREATE TABLE IF NOT EXISTS lab_reports (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        patient_id INT NOT NULL,
+        test_name VARCHAR(255) NOT NULL,
+        report_file VARCHAR(255) NOT NULL,
+        uploaded_by INT NOT NULL,
+        uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        report_date DATE NOT NULL,
+        INDEX idx_patient (patient_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+
+    // Map current user to patient id
+    $pid_stmt = $conn->prepare('SELECT id FROM patients WHERE user_id = ?');
+    $pid_stmt->bind_param('i', $user_id);
+    $pid_stmt->execute();
+    $pid_res = $pid_stmt->get_result();
+    if ($pid_res && $pid_res->num_rows > 0) {
+        $patient_row = $pid_res->fetch_assoc();
+        $patient_id_only = intval($patient_row['id']);
+        $rep_stmt = $conn->prepare('SELECT id, test_name, report_file, uploaded_at, report_date FROM lab_reports WHERE patient_id = ? ORDER BY report_date DESC, uploaded_at DESC');
+        $rep_stmt->bind_param('i', $patient_id_only);
+        $rep_stmt->execute();
+        $rep_res = $rep_stmt->get_result();
+        while ($r = $rep_res->fetch_assoc()) { $reports[] = $r; }
+    }
+} catch (Throwable $e) {
+    // Silently ignore to avoid breaking the dashboard
+}
+
 // Add this at the top of the file where other PHP code is
 $notification_count = 0;
 $meeting_notifications = []; // Renamed for clarity
@@ -421,6 +453,39 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
+        </div>
+
+        <!-- My Reports Section -->
+        <div style="margin-top: 40px;" class="appointments-title">My Reports</div>
+        <div class="appointment-card">
+            <div class="appointment-info" style="width:100%">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:10px; border-bottom:1px solid #23244a; color:#b3b3b3; background:#0f1230;">Test Name</th>
+                            <th style="text-align:left; padding:10px; border-bottom:1px solid #23244a; color:#b3b3b3; background:#0f1230;">Report Date</th>
+                            <th style="text-align:left; padding:10px; border-bottom:1px solid #23244a; color:#b3b3b3; background:#0f1230;">Uploaded At</th>
+                            <th style="text-align:left; padding:10px; border-bottom:1px solid #23244a; color:#b3b3b3; background:#0f1230;">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($reports)): ?>
+                            <tr>
+                                <td colspan="4" style="padding:14px; color:#d0d0d0;">No reports available yet.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($reports as $rep): ?>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['test_name']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['report_date']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['uploaded_at']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><a style="color:#7f5fff; text-decoration:underline;" href="<?php echo htmlspecialchars($rep['report_file']); ?>" target="_blank" rel="noopener noreferrer">Download</a></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <!-- Popup Modal for Join Meeting -->
         <div id="meeting-popup" class="meeting-popup">
