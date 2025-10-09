@@ -195,8 +195,6 @@ const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
 
   useEffect(() => {
     checkAuthentication();
@@ -241,71 +239,24 @@ const AdminPage = () => {
           setIsAuthenticated(true);
           setUserInfo(authData.user);
         } else {
-          setIsAuthenticated(false);
-          setShowLogin(true);
+          window.location.href = 'http://localhost/MediAI-main/login.php';
         }
       } else {
-        setIsAuthenticated(false);
-        setShowLogin(true);
+        window.location.href = 'http://localhost/MediAI-main/login.php';
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      setIsAuthenticated(false);
-      setShowLogin(true);
+      window.location.href = 'http://localhost/MediAI-main/login.php';
     }
   };
 
   const handleLogout = () => {
-    fetch('logout.php', {
+    fetch('http://localhost/MediAI-main/logout.php', {
       method: 'POST',
       credentials: 'include'
     }).then(() => {
-      // Clear all state
-      setIsAuthenticated(false);
-      setUserInfo(null);
-      setDatabaseData({});
-      setShowLogin(true);
-      
-      // Redirect to login page
-      window.location.href = 'login.php';
-    }).catch(error => {
-      console.error('Logout error:', error);
-      // Even if logout fails, redirect to login
-      window.location.href = 'login.php';
+      window.location.href = 'http://localhost/MediAI-main/login.php';
     });
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost/MediAI-main/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        credentials: 'include',
-        body: `email=${encodeURIComponent(loginData.email)}&password=${encodeURIComponent(loginData.password)}`
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setIsAuthenticated(true);
-          setUserInfo(result.user);
-          setShowLogin(false);
-          setLoginData({ email: '', password: '' });
-          fetchDatabaseData();
-          alert('Login successful!');
-        } else {
-          alert(`Login failed: ${result.message}`);
-        }
-      } else {
-        alert('Login failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
-    }
   };
 
   const fetchDatabaseData = async () => {
@@ -533,102 +484,6 @@ const AdminPage = () => {
       </div>
     );
   };
-
-  if (showLogin) {
-    return (
-      <div className="admin-page">
-        <div className="admin-container">
-          <div className="admin-header">
-            <h1>🔐 MediAI Admin Login</h1>
-            <p>Please login to access the admin panel</p>
-          </div>
-          
-          <div style={{
-            maxWidth: '400px',
-            margin: '50px auto',
-            background: '#181d36',
-            padding: '30px',
-            borderRadius: '15px',
-            border: '1px solid rgb(163, 184, 239)'
-          }}>
-            <form onSubmit={handleLogin}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff' }}>Email:</label>
-                <input
-                  type="email"
-                  value={loginData.email}
-                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid rgb(163, 184, 239)',
-                    borderRadius: '8px',
-                    background: '#13153a',
-                    color: '#fff',
-                    fontSize: '16px'
-                  }}
-                  placeholder="admin@mediai.com"
-                />
-              </div>
-              
-              <div style={{ marginBottom: '30px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff' }}>Password:</label>
-                <input
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid rgb(163, 184, 239)',
-                    borderRadius: '8px',
-                    background: '#13153a',
-                    color: '#fff',
-                    fontSize: '16px'
-                  }}
-                  placeholder="Enter password"
-                />
-              </div>
-              
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '15px',
-                  background: '#a259ff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseOver={(e) => e.target.style.background = '#8a4cff'}
-                onMouseOut={(e) => e.target.style.background = '#a259ff'}
-              >
-                🚀 Login to Admin Panel
-              </button>
-            </form>
-            
-            <div style={{
-              marginTop: '20px',
-              padding: '15px',
-              background: '#13153a',
-              borderRadius: '8px',
-              border: '1px solid rgb(163, 184, 239)'
-            }}>
-              <h4 style={{ color: '#a259ff', marginBottom: '10px' }}>Demo Credentials:</h4>
-              <p style={{ color: '#b3b3b3', margin: '5px 0' }}>Email: admin@mediai.com</p>
-              <p style={{ color: '#b3b3b3', margin: '5px 0' }}>Password: password</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
