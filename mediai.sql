@@ -57,6 +57,26 @@ INSERT INTO `ai_conversations` (`id`, `user_id`, `title`, `created_at`, `updated
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admins`
+--
+
+CREATE TABLE `admins` (
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) DEFAULT 'admin',
+  `department` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`user_id`, `role`, `department`, `created_at`) VALUES
+(20, 'super_admin', 'System Administration', '2025-10-03 22:00:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `appointments`
 --
 
@@ -68,15 +88,16 @@ CREATE TABLE `appointments` (
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `timeslot` varchar(50) DEFAULT NULL,
-  `report_file` varchar(255) DEFAULT NULL
+  `report_file` varchar(255) DEFAULT NULL,
+  `status` enum('scheduled','completed','cancelled','blocked') DEFAULT 'scheduled'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`) VALUES
-(1, 14, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL);
+INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`, `status`) VALUES
+(1, 14, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL, 'scheduled');
 
 -- --------------------------------------------------------
 
@@ -116,22 +137,6 @@ CREATE TABLE `bills` (
   `status` enum('unpaid','paid','cancelled') DEFAULT 'unpaid',
   `issued_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `admins`
---
-
-CREATE TABLE `admins` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `role` varchar(50) NOT NULL,
-  `department` varchar(100) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -289,6 +294,35 @@ INSERT INTO `community` (`id`, `name`, `description`, `photo`, `community_creato
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `communities` (alias for community)
+--
+
+CREATE TABLE `communities` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `photo` varchar(255) DEFAULT NULL,
+  `community_creator` int(11) NOT NULL,
+  `status` enum('active','blocked') DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `communities`
+--
+
+INSERT INTO `communities` (`id`, `name`, `description`, `photo`, `community_creator`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Mental Support', 'Mental Support is a compassionate community dedicated to providing emotional support, encouragement, and a safe space for those facing mental health challenges.', '1.jpg', 14, 'active', '2025-05-06 19:43:38', '2025-05-06 19:43:38'),
+(2, 'Diabetics Support', 'Diabetics Support is a caring community focused on sharing guidance, experiences, and encouragement for those living with diabetes.\r\nTogether, we manage, motivate, and thrive with informed choices and mutual support.', '4.png', 6, 'active', '2025-05-08 17:20:58', '2025-05-08 17:20:58'),
+(3, 'CareNest', 'CareNest is a supportive online health community where people connect, share experiences, and access trustworthy information on wellness, mental health, fitness, chronic illness, and preventive care.', '3.png', 10, 'active', '2025-05-10 10:17:42', '2025-05-10 10:17:42'),
+(4, 'Soul Support', 'A safe and loving space for healing hearts and uplifting minds.', '4.jpg', 16, 'active', '2025-06-30 04:44:20', '2025-06-30 04:44:20'),
+(5, 'Rise Within', 'Empowering growth, resilience, and inner strength through shared support.', '5.jpg', 16, 'active', '2025-06-30 04:45:48', '2025-06-30 04:45:48'),
+(6, 'Hope Harbor', 'Anchored in empathy, we share hope and healing one day at a time.', '6.jpg', 16, 'active', '2025-06-30 04:47:45', '2025-06-30 04:47:45');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `community_members`
 --
 
@@ -415,7 +449,8 @@ CREATE TABLE `feedback` (
   `doctor_id` int(11) DEFAULT NULL,
   `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
   `comment` text DEFAULT NULL,
-  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','blocked') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -574,7 +609,11 @@ CREATE TABLE `medications` (
   `medicine_name` varchar(255) NOT NULL,
   `dosage` varchar(255) DEFAULT NULL,
   `meal_time` enum('Before Meal','After Meal') NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','completed','cancelled') DEFAULT 'active',
+  `frequency` varchar(100) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -690,7 +729,10 @@ CREATE TABLE `posts` (
   `photo` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `post_creator` int(11) NOT NULL,
-  `community_id` int(11) NOT NULL
+  `community_id` int(11) NOT NULL,
+  `status` enum('active','blocked') DEFAULT 'active',
+  `title` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -791,7 +833,7 @@ CREATE TABLE `risk_predictions` (
 
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
-  `role_name` enum('patient','doctor','hospital','admin') NOT NULL
+  `role_name` enum('patient','doctor','hospital') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -840,7 +882,7 @@ CREATE TABLE `users` (
   `role_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `otp` int(11) NOT NULL,
-  `status` enum('authorized','unauthorized') NOT NULL
+  `status` enum('authorized','unauthorized','blocked') NOT NULL DEFAULT 'unauthorized'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -861,7 +903,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `role_id`, `cre
 (15, 'Abu Affan', 'maffan222290@bscse.uiu.ac.bd', '$2y$10$WsTvFcuAJsqa8Q12vUJ4Xuh6CuSiqnVmAVqqzMTeeAIZVJcsUhTWK', '01796651373', 2, '2025-05-08 18:52:46', 534711, 'authorized'),
 (16, 'Mahdee Arnab', 'mubasshirahmed263@gmail.com', '$2y$10$whzhyLxgabPfVKC/.2gaUuRGIWmVSlvjzajHZRCCNyxTKgU3k3VBC', '01751423255', 1, '2025-06-23 09:12:02', 415621, 'authorized'),
 (17, 'John Smith', 'jsmith4250@mediai.com', '$2y$10$enzdtXnFsN9GDDXovFmA7ONRjo60K89QGACVfpN//b/vlKQtbnuYW', '01700000000', 2, '2025-10-02 09:51:06', 0, 'authorized'),
-(19, 'Nurul Huda', 'nhuda2137@mediai.com', '$2y$10$StfKW8uY5zOAARdrJj0JsuCXcSFsOEZdPCiq/HMCZiUBNlpn14XCu', '01811111111', 2, '2025-10-02 09:57:40', 0, 'authorized');
+(19, 'Nurul Huda', 'nhuda2137@mediai.com', '$2y$10$StfKW8uY5zOAARdrJj0JsuCXcSFsOEZdPCiq/HMCZiUBNlpn14XCu', '01811111111', 2, '2025-10-02 09:57:40', 0, 'authorized'),
+(20, 'Admin User', 'admin@mediai.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '01700000001', 4, '2025-10-03 22:00:00', 0, 'authorized');
 
 -- --------------------------------------------------------
 
@@ -895,17 +938,17 @@ CREATE TABLE `video_meeting` (
 --
 
 --
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`user_id`);
-
---
 -- Indexes for table `ai_conversations`
 --
 ALTER TABLE `ai_conversations`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `admins`
+--
+ALTER TABLE `admins`
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `appointments`
@@ -967,6 +1010,13 @@ ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `post_id` (`post_id`),
   ADD KEY `commentor` (`commentor`);
+
+--
+-- Indexes for table `communities`
+--
+ALTER TABLE `communities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `community_creator` (`community_creator`);
 
 --
 -- Indexes for table `community`
@@ -1173,6 +1223,12 @@ ALTER TABLE `ai_conversations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
+-- AUTO_INCREMENT for table `admins`
+--
+ALTER TABLE `admins`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
@@ -1219,6 +1275,12 @@ ALTER TABLE `chatbot_queries`
 --
 ALTER TABLE `comments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `communities`
+--
+ALTER TABLE `communities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `community`
@@ -1350,7 +1412,7 @@ ALTER TABLE `time_for_meeting`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `video_consultations`
@@ -1369,16 +1431,16 @@ ALTER TABLE `video_meeting`
 --
 
 --
--- Constraints for table `admins`
---
-ALTER TABLE `admins`
-  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
 -- Constraints for table `ai_conversations`
 --
 ALTER TABLE `ai_conversations`
   ADD CONSTRAINT `ai_conversations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `admins`
+--
+ALTER TABLE `admins`
+  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `appointments`
@@ -1426,6 +1488,12 @@ ALTER TABLE `chatbot_queries`
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`),
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`commentor`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `communities`
+--
+ALTER TABLE `communities`
+  ADD CONSTRAINT `communities_ibfk_1` FOREIGN KEY (`community_creator`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `community`
