@@ -37,6 +37,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         case 3: // hospital
           header("Location: index.php");
           break;
+        case 4: // admin
+          header("Location: http://localhost:3001");
+          break;
         default:
           header("Location: index.php");
       }
