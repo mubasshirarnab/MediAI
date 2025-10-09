@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2025 at 06:02 PM
+-- Generation Time: Oct 03, 2025 at 10:22 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -120,10 +120,66 @@ CREATE TABLE `bills` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `cabins`
+--
+
+CREATE TABLE `cabins` (
+  `cabin_id` int(11) NOT NULL,
+  `cabin_number` varchar(50) NOT NULL,
+  `type` enum('general','deluxe','ICU') NOT NULL,
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `availability` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cabins`
+--
+
+INSERT INTO `cabins` (`cabin_id`, `cabin_number`, `type`, `price`, `availability`, `created_at`, `updated_at`) VALUES
+(1, '1', 'general', 250.00, 1, '2025-10-03 19:39:07', '2025-10-03 19:39:07'),
+(2, '2', 'deluxe', 500.00, 1, '2025-10-03 19:39:24', '2025-10-03 19:39:24'),
+(3, '3', 'ICU', 1000.00, 1, '2025-10-03 19:39:44', '2025-10-03 19:39:44'),
+(4, '4', 'general', 100.00, 0, '2025-10-03 19:40:01', '2025-10-03 19:40:01'),
+(7, '6', 'deluxe', 200.00, 1, '2025-10-03 20:00:49', '2025-10-03 20:00:49');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cabin_bookings`
 --
 
 CREATE TABLE `cabin_bookings` (
+  `booking_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `cabin_id` int(11) NOT NULL,
+  `booking_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `check_in` date NOT NULL,
+  `check_out` date NOT NULL,
+  `status` enum('booked','completed','cancelled') NOT NULL DEFAULT 'booked'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cabin_bookings`
+--
+
+INSERT INTO `cabin_bookings` (`booking_id`, `user_id`, `cabin_id`, `booking_date`, `check_in`, `check_out`, `status`) VALUES
+(1, 14, 1, '2025-10-03 19:41:14', '2025-10-10', '2025-10-15', 'booked'),
+(2, 14, 3, '2025-10-03 19:41:39', '2025-10-10', '2025-10-15', 'booked'),
+(3, 14, 2, '2025-10-03 19:42:29', '2025-10-10', '2025-10-15', 'booked'),
+(4, 14, 2, '2025-10-03 20:02:06', '2025-10-15', '2025-10-20', 'booked'),
+(5, 14, 7, '2025-10-03 20:02:43', '2025-10-05', '2025-10-20', 'booked'),
+(6, 14, 2, '2025-10-03 20:03:09', '2025-10-06', '2025-10-08', 'booked'),
+(7, 14, 7, '2025-10-03 20:03:34', '2025-10-27', '2025-10-30', 'booked');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cabin_bookings_legacy`
+--
+
+CREATE TABLE `cabin_bookings_legacy` (
   `id` int(11) NOT NULL,
   `patient_id` int(11) DEFAULT NULL,
   `cabin_type` varchar(50) DEFAULT NULL,
@@ -365,23 +421,6 @@ CREATE TABLE `hospitals` (
 
 INSERT INTO `hospitals` (`user_id`, `hospital_name`, `registration_number`, `location`) VALUES
 (7, 'United Hospital', 'LM123Q', 'Plot 15, Road 71, Gulshan  Dhaka 1212, Bangladesh');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `admins`
---
-
-CREATE TABLE `admins` (
-  `user_id` int(11) NOT NULL,
-  `role` varchar(100) NOT NULL,
-  `department` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `admins`
---
-
 
 -- --------------------------------------------------------
 
@@ -736,7 +775,7 @@ CREATE TABLE `risk_predictions` (
 
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
-  `role_name` enum('patient','doctor','hospital','admin') NOT NULL
+  `role_name` enum('patient','doctor','hospital') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -746,8 +785,7 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`id`, `role_name`) VALUES
 (1, 'patient'),
 (2, 'doctor'),
-(3, 'hospital'),
-(4, 'admin');
+(3, 'hospital');
 
 -- --------------------------------------------------------
 
@@ -870,9 +908,24 @@ ALTER TABLE `bills`
   ADD KEY `patient_id` (`patient_id`);
 
 --
+-- Indexes for table `cabins`
+--
+ALTER TABLE `cabins`
+  ADD PRIMARY KEY (`cabin_id`),
+  ADD UNIQUE KEY `cabin_number` (`cabin_number`);
+
+--
 -- Indexes for table `cabin_bookings`
 --
 ALTER TABLE `cabin_bookings`
+  ADD PRIMARY KEY (`booking_id`),
+  ADD KEY `idx_cabin_dates` (`cabin_id`,`check_in`,`check_out`),
+  ADD KEY `idx_user` (`user_id`);
+
+--
+-- Indexes for table `cabin_bookings_legacy`
+--
+ALTER TABLE `cabin_bookings_legacy`
   ADD PRIMARY KEY (`id`),
   ADD KEY `patient_id` (`patient_id`);
 
@@ -949,12 +1002,6 @@ ALTER TABLE `feedback`
 ALTER TABLE `hospitals`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `registration_number` (`registration_number`);
-
---
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `inventory_items`
@@ -1121,9 +1168,21 @@ ALTER TABLE `bills`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `cabins`
+--
+ALTER TABLE `cabins`
+  MODIFY `cabin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `cabin_bookings`
 --
 ALTER TABLE `cabin_bookings`
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `cabin_bookings_legacy`
+--
+ALTER TABLE `cabin_bookings_legacy`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -1316,7 +1375,14 @@ ALTER TABLE `bills`
 -- Constraints for table `cabin_bookings`
 --
 ALTER TABLE `cabin_bookings`
-  ADD CONSTRAINT `cabin_bookings_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_cb_cabin` FOREIGN KEY (`cabin_id`) REFERENCES `cabins` (`cabin_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cb_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `cabin_bookings_legacy`
+--
+ALTER TABLE `cabin_bookings_legacy`
+  ADD CONSTRAINT `cabin_bookings_legacy_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `chatbot_queries`
@@ -1470,12 +1536,6 @@ ALTER TABLE `risk_predictions`
 ALTER TABLE `time_for_meeting`
   ADD CONSTRAINT `fk_tfm_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_tfm_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `admins`
---
-ALTER TABLE `admins`
-  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `users`
