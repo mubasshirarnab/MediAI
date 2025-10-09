@@ -89,6 +89,17 @@
         if (activeList === 'users') loadUsers(); else loadDoctors();
       }, [activeList]);
 
+      const handleLogout = () => {
+        fetch('logout.php', {
+          method: 'POST',
+          credentials: 'include'
+        }).then(() => {
+          window.location.href = 'login.php';
+        }).catch(() => {
+          window.location.href = 'login.php';
+        });
+      };
+
       const userCols = useMemo(() => ([
         { key:'id', title:'ID' },
         { key:'name', title:'Name' },
@@ -112,7 +123,10 @@
       return React.createElement('div', { className:'admin-container' }, [
         React.createElement('div', { key:'hdr', className:'header' }, [
           React.createElement('div', { key:'t', className:'title' }, 'Admin Dashboard'),
-          React.createElement('div', { key:'note', className:'muted' }, loadingCounts ? 'Loading…' : '')
+          React.createElement('div', { key:'actions', style: { display: 'flex', gap: '12px', alignItems: 'center' } }, [
+            React.createElement('div', { key:'note', className:'muted' }, loadingCounts ? 'Loading…' : ''),
+            React.createElement('button', { key:'logout', className:'btn', onClick: handleLogout, style: { background: '#dc3545', borderColor: '#dc3545' } }, '🚪 Logout')
+          ])
         ]),
 
         React.createElement('div', { key:'cards', className:'cards' }, [
