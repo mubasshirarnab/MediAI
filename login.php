@@ -20,6 +20,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verify password
     if (password_verify($password, $user['password'])) {
+      // Check if user is blocked by admin
+      if ($user['is_blocked'] == 1) {
+        $error_message = "Your account has been blocked by an administrator. Please contact support.";
+        header("Location: login.php?error=" . urlencode($error_message));
+        exit();
+      }
+      
       // Set session variables
       $_SESSION['user_id'] = $user['id'];
       $_SESSION['email'] = $user['email'];
@@ -36,6 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           break;
         case 3: // hospital
           header("Location: index.php");
+          break;
+        case 4: // admin
+          header("Location: admin/admin.php");
           break;
         default:
           header("Location: index.php");

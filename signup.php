@@ -33,6 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Map role values to role_id
     $role_map = array(
       'patient' => 1,
+      'doctor' => 2,
       'hospital' => 3,
       'admin' => 4
     );
@@ -108,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("All admin information is required");
           }
 
-          $insert_admin = "INSERT INTO admins (user_id, role, department) VALUES (?, ?, ?)";
+          $insert_admin = "INSERT INTO admins (user_id, admin_role, department) VALUES (?, ?, ?)";
           $stmt = $conn->prepare($insert_admin);
           if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
           $stmt->bind_param("iss", $user_id, $admin_role, $admin_department);

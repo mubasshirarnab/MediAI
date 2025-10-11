@@ -1,0 +1,244 @@
+/* Admin Dashboard Styles */
+.stat-card {
+  background: #181d36;
+  border: 1px solid rgb(163,184,239);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  min-width: 120px;
+  flex: 1;
+}
+
+.stat-card .number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #a259ff;
+  margin-bottom: 4px;
+}
+
+.stat-card .label {
+  font-size: 0.9rem;
+  color: #b3b3b3;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #23244a;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-type {
+  background: #a259ff;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
+}
+
+.activity-date {
+  color: #b3b3b3;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.btn-danger {
+  background: #ff4757;
+  border-color: #ff4757;
+}
+
+.btn-danger:hover {
+  background: #ff3742;
+  border-color: #ff3742;
+}
+
+.btn-success {
+  background: #2ed573;
+  border-color: #2ed573;
+}
+
+.btn-success:hover {
+  background: #26d065;
+  border-color: #26d065;
+}
+
+.btn-warning {
+  background: #ffa502;
+  border-color: #ffa502;
+}
+
+.btn-warning:hover {
+  background: #ff9500;
+  border-color: #ff9500;
+}
+
+/* Table improvements */
+table {
+  margin-top: 16px;
+}
+
+th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+td {
+  vertical-align: middle;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+  
+  .row {
+    flex-direction: column;
+  }
+  
+  .stat-card {
+    margin-bottom: 12px;
+  }
+  
+  table {
+    font-size: 0.9rem;
+  }
+  
+  th, td {
+    padding: 8px 6px;
+  }
+}
+
+/* Loading states */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #b3b3b3;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #b3b3b3;
+}
+
+.empty-state::before {
+  content: "📋";
+  display: block;
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+/* Form improvements */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #a259ff;
+  box-shadow: 0 0 0 2px rgba(162, 89, 255, 0.2);
+}
+
+/* Button improvements */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: inherit;
+  border-color: inherit;
+}
+
+/* Card improvements */
+.card h3, .card h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.card p {
+  margin-bottom: 16px;
+  color: #b3b3b3;
+  line-height: 1.5;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Status indicators */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-verified {
+  background: #2ed573;
+  color: #fff;
+}
+
+.status-unverified {
+  background: #ffa502;
+  color: #fff;
+}
+
+.status-active {
+  background: #2ed573;
+  color: #fff;
+}
+
+.status-blocked {
+  background: #ff4757;
+  color: #fff;
+}
+
+.status-pending {
+  background: #ffa502;
+  color: #fff;
+}
+
+.status-active {
+  background: #2ed573;
+  color: #fff;
+}
+
+.status-inactive {
+  background: #ff4757;
+  color: #fff;
+}
