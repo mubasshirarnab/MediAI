@@ -564,7 +564,7 @@ $total_patients = $conn->query($patients_query)->fetch_assoc()['total_patients']
                 <i class="fas fa-credit-card" style="font-size: 2.5rem; color: #667eea; margin-bottom: 15px;"></i>
                 <h3>Billing</h3>
                 <p>Manage hospital billing, payments, and financial transactions with detailed records</p>
-                <a href="billing.php">Manage Billing</a>
+                <a href="hospital_billing/billing.php">Manage Billing</a>
             </div>
 
             <div class="feature-card loading">
