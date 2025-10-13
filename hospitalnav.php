@@ -24,6 +24,7 @@
             <a href="hospital_dashboard.php" class="navbar-link">Profile</a>
             <a href="hospital_inventory.php" class="navbar-link">Inventory</a>
             <a href="admin_cabin_management.php" class="navbar-link">Cabins</a>
+            <a href="report_upload.php" class="navbar-link">Report Upload</a>
         </nav>
         <div class="navbar-icons">
             <i class="fa-solid fa-bell navbar-bell"></i>

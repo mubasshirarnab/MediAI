@@ -1,5 +1,6 @@
 <?php
-
+// Ensure session is started for role-based nav
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once 'dbConnect.php';
 
 $notification_count = 0;
@@ -159,13 +160,21 @@ if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
       <a href="doctors.php" class="navbar-link">Appointment</a>
       <a href="feed.php" class="navbar-link">Community</a>
       <a href="mediReminder.php" class="navbar-link">Medication Reminder</a>
-      <a href="cabin_booking.php" class="navbar-link">Cabin Booking</a>
       <?php
+        // Role-aware pages
+        $role = $_SESSION['role'] ?? null; // 'patient' | 'doctor' | 'hospital'
+        if ($role === 'hospital') {
+          echo '<a href="admin_cabin_management.php" class="navbar-link">Cabins</a>'; // Hospital cabin admin
+          echo '<a href="hospital_inventory.php" class="navbar-link">Inventory</a>';
+          echo '<a href="report_upload.php" class="navbar-link">Report Upload</a>';
+        } else {
+          // Default for patient/doctor: go to cabin booking
+          echo '<a href="cabin_booking.php" class="navbar-link">Cabins</a>';
+        }
 
-      $profile_link = 'patient_dashboard.php';
-      if (isset($_SESSION['role']) && $_SESSION['role'] == 'doctor') {
-        $profile_link = 'doctor_dashboard.php';
-      }
+        $profile_link = 'patient_dashboard.php';
+        if ($role === 'doctor') { $profile_link = 'doctor_dashboard.php'; }
+        if ($role === 'hospital') { $profile_link = 'hospital_dashboard.php'; }
       ?>
       <a href="<?php echo $profile_link; ?>" class="navbar-link">Profile</a>
     </nav>
