@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2025 at 10:22 PM
+-- Generation Time: Oct 15, 2025 at 05:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -141,8 +141,8 @@ INSERT INTO `cabins` (`cabin_id`, `cabin_number`, `type`, `price`, `availability
 (1, '1', 'general', 250.00, 1, '2025-10-03 19:39:07', '2025-10-03 19:39:07'),
 (2, '2', 'deluxe', 500.00, 1, '2025-10-03 19:39:24', '2025-10-03 19:39:24'),
 (3, '3', 'ICU', 1000.00, 1, '2025-10-03 19:39:44', '2025-10-03 19:39:44'),
-(4, '4', 'general', 100.00, 0, '2025-10-03 19:40:01', '2025-10-03 19:40:01'),
-(7, '6', 'deluxe', 200.00, 1, '2025-10-03 20:00:49', '2025-10-03 20:00:49');
+(7, '6', 'deluxe', 200.00, 1, '2025-10-03 20:00:49', '2025-10-03 20:00:49'),
+(9, '7', 'general', 10.00, 1, '2025-10-08 18:24:35', '2025-10-08 18:24:35');
 
 -- --------------------------------------------------------
 
@@ -517,6 +517,31 @@ INSERT INTO `inventory_transactions` (`id`, `item_id`, `hospital_id`, `transacti
 (1, 41, 7, 'in', 5, '2025-07-01 19:55:26', 'Checked'),
 (2, 42, 7, 'in', 100, '2025-07-01 19:57:46', ''),
 (3, 54, 7, 'in', 10, '2025-07-01 20:14:02', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `lab_reports`
+--
+
+CREATE TABLE `lab_reports` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `test_name` varchar(255) NOT NULL,
+  `report_file` varchar(255) NOT NULL,
+  `uploaded_by` int(11) NOT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `report_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `lab_reports`
+--
+
+INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uploaded_by`, `uploaded_at`, `report_date`) VALUES
+(1, 16, 'blood count', 'uploads/reports/Assignment_3__1__pid16_20251008205617.pdf', 7, '2025-10-08 18:56:17', '2025-10-08'),
+(2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
+(3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
 
 -- --------------------------------------------------------
 
@@ -1026,6 +1051,13 @@ ALTER TABLE `inventory_transactions`
   ADD KEY `hospital_id` (`hospital_id`);
 
 --
+-- Indexes for table `lab_reports`
+--
+ALTER TABLE `lab_reports`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_patient` (`patient_id`);
+
+--
 -- Indexes for table `medication`
 --
 ALTER TABLE `medication`
@@ -1171,7 +1203,7 @@ ALTER TABLE `bills`
 -- AUTO_INCREMENT for table `cabins`
 --
 ALTER TABLE `cabins`
-  MODIFY `cabin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `cabin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `cabin_bookings`
@@ -1249,6 +1281,12 @@ ALTER TABLE `inventory_stock`
 -- AUTO_INCREMENT for table `inventory_transactions`
 --
 ALTER TABLE `inventory_transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `lab_reports`
+--
+ALTER TABLE `lab_reports`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
