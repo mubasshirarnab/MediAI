@@ -3,11 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
-<<<<<<< HEAD
 -- Generation Time: Oct 15, 2025 at 08:58 PM
-=======
--- Generation Time: Oct 15, 2025 at 07:51 PM
->>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -754,7 +750,6 @@ CREATE TABLE `lab_reports` (
   `report_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-<<<<<<< HEAD
 --
 -- Dumping data for table `lab_reports`
 --
@@ -763,9 +758,6 @@ INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uplo
 (1, 16, 'blood count', 'uploads/reports/Assignment_3__1__pid16_20251008205617.pdf', 7, '2025-10-08 18:56:17', '2025-10-08'),
 (2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
 (3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
-
-=======
->>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 -- --------------------------------------------------------
 
 --
@@ -1938,11 +1930,7 @@ ALTER TABLE `inventory_transactions`
 -- AUTO_INCREMENT for table `lab_reports`
 --
 ALTER TABLE `lab_reports`
-<<<<<<< HEAD
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-=======
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
->>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 
 --
 -- AUTO_INCREMENT for table `medication`

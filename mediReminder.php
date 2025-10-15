@@ -568,39 +568,39 @@
     <aside class="sidebar">
       <form class="medicine-form" method="POST">
         <?php if (isset($success_message)): ?>
-          <div class="message success"><?php echo $success_message; ?></div>
+          <div class="message success" id="success_message"><?php echo $success_message; ?></div>
         <?php endif; ?>
         
         <?php if (isset($error_message)): ?>
           <div class="message error"><?php echo $error_message; ?></div>
         <?php endif; ?>
         
-        <input type="text" name="medicine_name" placeholder="Medicine Name" required>
+        <input type="text" id ="medicine" name="medicine_name" placeholder="Medicine Name" required>
         
         <div class="radio-group">
           <label class="custom-radio">
-            <input type="radio" name="meal_time" value="Before Meal" checked>
+            <input type="radio" id="before_meal" name="meal_time" value="Before Meal" checked>
             <span class="radio-btn"></span>
             Before Meal
           </label>
           <label class="custom-radio">
-            <input type="radio" name="meal_time" value="After Meal">
+            <input type="radio" id="after_meal" name="meal_time" value="After Meal">
             <span class="radio-btn"></span>
             After Meal
           </label>
         </div>
         
-        <input type="date" name="begin_date" placeholder="Begin Date" required>
-        <input type="date" name="end_date" placeholder="End Date" required>
+        <input type="date" id = "start_date" name="begin_date" placeholder="Begin Date" required>
+        <input type="date" id = "end_date" name="end_date" placeholder="End Date" required>
         
         <div id="time-inputs">
           <div class="time-input-group">
-            <input type="time" name="dose_times[]" required>
+            <input type="time" id ="time" name="dose_times[]" required>
             <button type="button" class="add-time-btn" onclick="addTimeInput()">+</button>
           </div>
         </div>
         
-        <button type="submit" name="save_medicine" class="save-btn">Save Medicine</button>
+        <button type="submit" id="add" name="save_medicine" class="save-btn">Save Medicine</button>
       </form>
     </aside>
     
