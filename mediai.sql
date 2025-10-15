@@ -3,7 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
+<<<<<<< HEAD
 -- Generation Time: Oct 15, 2025 at 08:58 PM
+=======
+-- Generation Time: Oct 15, 2025 at 07:51 PM
+>>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +24,28 @@ SET time_zone = "+00:00";
 --
 -- Database: `mediai`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admins`
+--
+
+CREATE TABLE `admins` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `admin_role` varchar(100) NOT NULL,
+  `department` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id`, `user_id`, `admin_role`, `department`, `created_at`, `updated_at`) VALUES
+(1, 999, 'Super Admin', 'System Administration', '2025-10-15 17:04:55', '2025-10-15 17:04:55');
 
 -- --------------------------------------------------------
 
@@ -122,8 +148,58 @@ CREATE TABLE `bills` (
   `patient_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
   `status` enum('unpaid','paid','cancelled') DEFAULT 'unpaid',
-  `issued_date` date DEFAULT NULL
+  `issued_date` date DEFAULT NULL,
+  `bill_type` enum('advance','interim','final') DEFAULT 'final',
+  `due_date` date DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `tax_amount` decimal(10,2) DEFAULT 0.00,
+  `total_amount` decimal(10,2) DEFAULT 0.00,
+  `paid_amount` decimal(10,2) DEFAULT 0.00,
+  `balance_amount` decimal(10,2) DEFAULT 0.00,
+  `insurance_claim_id` varchar(100) DEFAULT NULL,
+  `corporate_client_id` int(11) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bills`
+--
+
+INSERT INTO `bills` (`id`, `patient_id`, `amount`, `status`, `issued_date`, `bill_type`, `due_date`, `discount_amount`, `tax_amount`, `total_amount`, `paid_amount`, `balance_amount`, `insurance_claim_id`, `corporate_client_id`, `created_by`, `updated_by`, `updated_at`) VALUES
+(1, 16, 3000.00, 'paid', NULL, 'final', NULL, 600.00, 0.00, 2400.00, 2400.00, 0.00, '0', 0, 7, 7, '2025-10-15 17:13:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bill_items`
+--
+
+CREATE TABLE `bill_items` (
+  `id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `item_type` enum('service','medicine','test','room','doctor_fee','nursing','surgery','other') NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `item_description` text DEFAULT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `discount_percentage` decimal(5,2) DEFAULT 0.00,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `final_price` decimal(10,2) NOT NULL,
+  `service_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bill_items`
+--
+
+INSERT INTO `bill_items` (`id`, `bill_id`, `item_type`, `item_name`, `item_description`, `quantity`, `unit_price`, `total_price`, `discount_percentage`, `discount_amount`, `final_price`, `service_date`, `created_at`) VALUES
+(1, 1, 'nursing', 'Nursing Care', 'Nursing Care - Nursing', 1, 500.00, 500.00, 0.00, 0.00, 500.00, NULL, '2025-10-15 17:13:12'),
+(2, 1, 'room', 'General Ward Bed', 'General Ward Bed - General Ward', 1, 2000.00, 2000.00, 0.00, 0.00, 2000.00, NULL, '2025-10-15 17:13:12'),
+(3, 1, 'nursing', 'Nursing Care', 'Nursing Care - Nursing', 1, 500.00, 500.00, 0.00, 0.00, 500.00, NULL, '2025-10-15 17:13:12');
 
 -- --------------------------------------------------------
 
@@ -316,6 +392,68 @@ INSERT INTO `community_members` (`id`, `user_id`, `community_id`, `joined_at`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `corporate_clients`
+--
+
+CREATE TABLE `corporate_clients` (
+  `id` int(11) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `credit_limit` decimal(10,2) DEFAULT 0.00,
+  `payment_terms_days` int(11) DEFAULT 30,
+  `discount_percentage` decimal(5,2) DEFAULT 0.00,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `corporate_clients`
+--
+
+INSERT INTO `corporate_clients` (`id`, `company_name`, `contact_person`, `contact_email`, `contact_phone`, `address`, `credit_limit`, `payment_terms_days`, `discount_percentage`, `is_active`, `created_at`, `created_by`) VALUES
+(1, 'ABC Corporation', 'Mr. Rahman', 'rahman@abc.com', '01700000005', NULL, 100000.00, 30, 10.00, 1, '2025-10-15 17:05:17', NULL),
+(2, 'XYZ Limited', 'Ms. Begum', 'begum@xyz.com', '01700000006', NULL, 50000.00, 45, 5.00, 1, '2025-10-15 17:05:17', NULL),
+(3, 'DEF Industries', 'Mr. Hossain', 'hossain@def.com', '01700000007', NULL, 200000.00, 60, 15.00, 1, '2025-10-15 17:05:17', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discounts`
+--
+
+CREATE TABLE `discounts` (
+  `id` int(11) NOT NULL,
+  `discount_name` varchar(255) NOT NULL,
+  `discount_type` enum('percentage','fixed_amount') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL,
+  `applicable_to` enum('all','specific_patient','corporate','insurance') DEFAULT 'all',
+  `applicable_patient_id` int(11) DEFAULT NULL,
+  `applicable_corporate_id` int(11) DEFAULT NULL,
+  `applicable_insurance_id` int(11) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `discounts`
+--
+
+INSERT INTO `discounts` (`id`, `discount_name`, `discount_type`, `discount_value`, `applicable_to`, `applicable_patient_id`, `applicable_corporate_id`, `applicable_insurance_id`, `start_date`, `end_date`, `is_active`, `created_at`, `created_by`) VALUES
+(1, 'Senior Citizen Discount', 'percentage', 10.00, 'all', NULL, NULL, NULL, '2024-01-01', '2024-12-31', 1, '2025-10-15 17:05:17', NULL),
+(2, 'Student Discount', 'percentage', 15.00, 'all', NULL, NULL, NULL, '2024-01-01', '2024-12-31', 1, '2025-10-15 17:05:17', NULL),
+(3, 'Corporate Discount', 'percentage', 20.00, 'corporate', NULL, NULL, NULL, '2024-01-01', '2024-12-31', 1, '2025-10-15 17:05:17', NULL),
+(4, 'Insurance Discount', 'percentage', 25.00, 'insurance', NULL, NULL, NULL, '2024-01-01', '2024-12-31', 1, '2025-10-15 17:05:17', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `disease_predictions`
 --
 
@@ -376,6 +514,24 @@ INSERT INTO `doctor_hospital` (`id`, `doctor_id`, `hospital_id`, `created_at`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `doctor_shares`
+--
+
+CREATE TABLE `doctor_shares` (
+  `id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `share_type` enum('consultation','surgery','procedure','commission') NOT NULL,
+  `share_percentage` decimal(5,2) DEFAULT 0.00,
+  `share_amount` decimal(10,2) NOT NULL,
+  `payment_status` enum('pending','paid','cancelled') DEFAULT 'pending',
+  `payment_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `expertise`
 --
 
@@ -430,6 +586,61 @@ CREATE TABLE `hospitals` (
 
 INSERT INTO `hospitals` (`user_id`, `hospital_name`, `registration_number`, `location`) VALUES
 (7, 'United Hospital', 'LM123Q', 'Plot 15, Road 71, Gulshan  Dhaka 1212, Bangladesh');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hospital_settings`
+--
+
+CREATE TABLE `hospital_settings` (
+  `id` int(11) NOT NULL,
+  `hospital_id` int(11) NOT NULL,
+  `setting_category` varchar(50) NOT NULL,
+  `setting_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`setting_data`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `hospital_settings`
+--
+
+INSERT INTO `hospital_settings` (`id`, `hospital_id`, `setting_category`, `setting_data`, `created_at`, `updated_at`) VALUES
+(1, 7, 'general', '{\"hospital_name\": \"United Hospital\", \"hospital_address\": \"Plot 15, Road 71, Gulshan Dhaka 1212, Bangladesh\", \"hospital_phone\": \"+880-123-456-789\", \"hospital_email\": \"info@unitedhospital.com\", \"hospital_website\": \"https://unitedhospital.com\", \"operating_hours\": {\"monday\": \"24/7\", \"tuesday\": \"24/7\", \"wednesday\": \"24/7\", \"thursday\": \"24/7\", \"friday\": \"24/7\", \"saturday\": \"24/7\", \"sunday\": \"24/7\"}, \"timezone\": \"Asia/Dhaka\", \"currency\": \"BDT\", \"language\": \"en\", \"theme\": \"light\", \"date_format\": \"Y-m-d\", \"time_format\": \"H:i:s\"}', '2025-10-15 17:05:31', '2025-10-15 17:05:31'),
+(2, 7, 'billing', '{\"tax_rate\": 0.00, \"service_charge\": 0.00, \"currency\": \"BDT\", \"auto_billing_enabled\": false}', '2025-10-15 17:05:31', '2025-10-15 17:05:31'),
+(3, 7, 'notifications', '{\"email_enabled\": true, \"sms_enabled\": true, \"push_enabled\": true}', '2025-10-15 17:05:31', '2025-10-15 17:05:31'),
+(4, 7, 'system', '{\"maintenance_mode\": false, \"backup_frequency\": \"daily\", \"audit_log_enabled\": true}', '2025-10-15 17:05:31', '2025-10-15 17:05:31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `insurance_companies`
+--
+
+CREATE TABLE `insurance_companies` (
+  `id` int(11) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `policy_prefix` varchar(50) DEFAULT NULL,
+  `co_payment_percentage` decimal(5,2) DEFAULT 0.00,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `insurance_companies`
+--
+
+INSERT INTO `insurance_companies` (`id`, `company_name`, `contact_person`, `contact_email`, `contact_phone`, `address`, `policy_prefix`, `co_payment_percentage`, `is_active`, `created_at`, `created_by`) VALUES
+(1, 'Green Delta Insurance', 'Mr. Ahmed', 'ahmed@greendelta.com', '01700000001', NULL, NULL, 20.00, 1, '2025-10-15 17:05:17', NULL),
+(2, 'Pragati Insurance', 'Ms. Fatima', 'fatima@pragati.com', '01700000002', NULL, NULL, 15.00, 1, '2025-10-15 17:05:17', NULL),
+(3, 'Reliance Insurance', 'Mr. Karim', 'karim@reliance.com', '01700000003', NULL, NULL, 25.00, 1, '2025-10-15 17:05:17', NULL),
+(4, 'MetLife Insurance', 'Ms. Rina', 'rina@metlife.com', '01700000004', NULL, NULL, 10.00, 1, '2025-10-15 17:05:17', NULL);
 
 -- --------------------------------------------------------
 
@@ -543,6 +754,7 @@ CREATE TABLE `lab_reports` (
   `report_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+<<<<<<< HEAD
 --
 -- Dumping data for table `lab_reports`
 --
@@ -552,6 +764,8 @@ INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uplo
 (2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
 (3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
 
+=======
+>>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 -- --------------------------------------------------------
 
 --
@@ -671,6 +885,52 @@ INSERT INTO `meeting_code` (`id`, `patient_id`, `doctor_id`, `meeting_code`) VAL
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `packages`
+--
+
+CREATE TABLE `packages` (
+  `id` int(11) NOT NULL,
+  `package_name` varchar(255) NOT NULL,
+  `package_description` text DEFAULT NULL,
+  `package_type` enum('maternity','surgery','cardiology','orthopedic','general','custom') NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `duration_days` int(11) DEFAULT NULL,
+  `includes` text DEFAULT NULL,
+  `exclusions` text DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `packages`
+--
+
+INSERT INTO `packages` (`id`, `package_name`, `package_description`, `package_type`, `total_price`, `duration_days`, `includes`, `exclusions`, `is_active`, `created_at`, `created_by`) VALUES
+(1, 'Maternity Package', 'Complete maternity care including delivery', 'maternity', 50000.00, 3, 'Delivery, Room, Nursing, Medicine', 'Complications, ICU', 1, '2025-10-15 17:05:17', NULL),
+(2, 'Heart Surgery Package', 'Complete heart surgery package', 'cardiology', 200000.00, 7, 'Surgery, ICU, Medicine, Follow-up', 'Pre-existing conditions', 1, '2025-10-15 17:05:17', NULL),
+(3, 'General Surgery Package', 'General surgery with room and care', 'surgery', 75000.00, 5, 'Surgery, Room, Nursing, Medicine', 'Post-surgery complications', 1, '2025-10-15 17:05:17', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `package_items`
+--
+
+CREATE TABLE `package_items` (
+  `id` int(11) NOT NULL,
+  `package_id` int(11) NOT NULL,
+  `item_type` enum('service','medicine','test','room','doctor_fee','nursing','surgery','other') NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `item_description` text DEFAULT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `patients`
 --
 
@@ -695,6 +955,64 @@ INSERT INTO `patients` (`user_id`, `gender`, `date_of_birth`, `address`) VALUES
 (13, 'male', '2002-02-22', 'notunbazar'),
 (14, 'female', '2001-04-03', 'Mirpur 2'),
 (16, 'male', '2001-10-16', 'Sayednagar');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `patient_ledger`
+--
+
+CREATE TABLE `patient_ledger` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `transaction_type` enum('charge','payment','refund','discount') NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `reference_type` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `patient_ledger`
+--
+
+INSERT INTO `patient_ledger` (`id`, `patient_id`, `transaction_type`, `amount`, `description`, `reference_id`, `reference_type`, `created_at`, `created_by`) VALUES
+(1, 16, 'charge', 2400.00, 'Bill created', 1, 'bill', '2025-10-15 17:13:12', 7),
+(2, 16, 'payment', 2400.00, 'Payment received', 1, 'payment', '2025-10-15 17:13:26', 7);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `payment_method` enum('cash','card','mobile_banking','bank_transfer','cheque','insurance','corporate') NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_reference` varchar(255) DEFAULT NULL,
+  `payment_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `payment_status` enum('pending','completed','failed','refunded') DEFAULT 'completed',
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `bank_name` varchar(100) DEFAULT NULL,
+  `cheque_number` varchar(50) DEFAULT NULL,
+  `cheque_date` date DEFAULT NULL,
+  `mobile_banking_provider` varchar(50) DEFAULT NULL,
+  `mobile_number` varchar(20) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `bill_id`, `patient_id`, `payment_method`, `payment_amount`, `payment_reference`, `payment_date`, `payment_status`, `transaction_id`, `bank_name`, `cheque_number`, `cheque_date`, `mobile_banking_provider`, `mobile_number`, `created_by`, `notes`) VALUES
+(1, 1, 16, 'cash', 2400.00, 'dsd', '2025-10-15 17:13:26', 'completed', '', '', NULL, NULL, '', '', 7, NULL);
 
 -- --------------------------------------------------------
 
@@ -793,6 +1111,27 @@ INSERT INTO `qualifications` (`id`, `user_id`, `qualification`, `institute`, `ye
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `refunds`
+--
+
+CREATE TABLE `refunds` (
+  `id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `refund_amount` decimal(10,2) NOT NULL,
+  `refund_reason` text NOT NULL,
+  `refund_method` enum('cash','card','bank_transfer','mobile_banking') NOT NULL,
+  `refund_reference` varchar(255) DEFAULT NULL,
+  `refund_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `refund_status` enum('pending','approved','processed','completed') DEFAULT 'pending',
+  `approved_by` int(11) DEFAULT NULL,
+  `processed_by` int(11) DEFAULT NULL,
+  `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `risk_predictions`
 --
 
@@ -813,7 +1152,7 @@ CREATE TABLE `risk_predictions` (
 
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
-  `role_name` enum('patient','doctor','hospital') NOT NULL
+  `role_name` enum('patient','doctor','hospital','admin') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -823,7 +1162,132 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`id`, `role_name`) VALUES
 (1, 'patient'),
 (2, 'doctor'),
-(3, 'hospital');
+(3, 'hospital'),
+(4, 'admin');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `service_charges`
+--
+
+CREATE TABLE `service_charges` (
+  `id` int(11) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `service_type` enum('consultation','surgery','procedure','test','medicine','room','nursing','other') NOT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `base_price` decimal(10,2) NOT NULL,
+  `unit` varchar(50) DEFAULT 'per_service',
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `service_charges`
+--
+
+INSERT INTO `service_charges` (`id`, `service_name`, `service_type`, `department`, `base_price`, `unit`, `is_active`, `created_at`, `updated_at`, `created_by`) VALUES
+(1, 'General Consultation', 'consultation', 'General Medicine', 500.00, 'per_visit', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(2, 'Cardiology Consultation', 'consultation', 'Cardiology', 800.00, 'per_visit', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(3, 'Surgery Consultation', 'consultation', 'Surgery', 1000.00, 'per_visit', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(4, 'Emergency Consultation', 'consultation', 'Emergency', 1200.00, 'per_visit', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(5, 'CBC Test', 'test', 'Laboratory', 300.00, 'per_test', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(6, 'X-Ray Chest', 'test', 'Radiology', 400.00, 'per_test', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(7, 'CT Scan', 'test', 'Radiology', 2000.00, 'per_test', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(8, 'MRI', 'test', 'Radiology', 5000.00, 'per_test', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(9, 'General Ward Bed', 'room', 'General Ward', 2000.00, 'per_day', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(10, 'Private Room', 'room', 'Private Ward', 5000.00, 'per_day', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(11, 'ICU Bed', 'room', 'ICU', 8000.00, 'per_day', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(12, 'Nursing Care', 'nursing', 'Nursing', 500.00, 'per_day', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(13, 'Surgery - Appendectomy', 'surgery', 'Surgery', 15000.00, 'per_surgery', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL),
+(14, 'Surgery - Gallbladder', 'surgery', 'Surgery', 25000.00, 'per_surgery', 1, '2025-10-15 17:05:17', '2025-10-15 17:05:17', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `service_tariffs`
+--
+
+CREATE TABLE `service_tariffs` (
+  `id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `price_group` enum('general','vip','corporate') NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `service_tariffs`
+--
+
+INSERT INTO `service_tariffs` (`id`, `service_id`, `price_group`, `price`, `updated_at`) VALUES
+(1, 1, 'general', 500.00, '2025-10-15 17:05:17'),
+(2, 2, 'general', 800.00, '2025-10-15 17:05:17'),
+(3, 3, 'general', 1000.00, '2025-10-15 17:05:17'),
+(4, 4, 'general', 1200.00, '2025-10-15 17:05:17'),
+(5, 5, 'general', 300.00, '2025-10-15 17:05:17'),
+(6, 6, 'general', 400.00, '2025-10-15 17:05:17'),
+(7, 7, 'general', 2000.00, '2025-10-15 17:05:17'),
+(8, 8, 'general', 5000.00, '2025-10-15 17:05:17'),
+(9, 9, 'general', 2000.00, '2025-10-15 17:05:17'),
+(10, 10, 'general', 5000.00, '2025-10-15 17:05:17'),
+(11, 11, 'general', 8000.00, '2025-10-15 17:05:17'),
+(12, 12, 'general', 500.00, '2025-10-15 17:05:17'),
+(13, 13, 'general', 15000.00, '2025-10-15 17:05:17'),
+(14, 14, 'general', 25000.00, '2025-10-15 17:05:17'),
+(16, 1, 'vip', 575.00, '2025-10-15 17:05:17'),
+(17, 2, 'vip', 920.00, '2025-10-15 17:05:17'),
+(18, 3, 'vip', 1150.00, '2025-10-15 17:05:17'),
+(19, 4, 'vip', 1380.00, '2025-10-15 17:05:17'),
+(20, 5, 'vip', 345.00, '2025-10-15 17:05:17'),
+(21, 6, 'vip', 460.00, '2025-10-15 17:05:17'),
+(22, 7, 'vip', 2300.00, '2025-10-15 17:05:17'),
+(23, 8, 'vip', 5750.00, '2025-10-15 17:05:17'),
+(24, 9, 'vip', 2300.00, '2025-10-15 17:05:17'),
+(25, 10, 'vip', 5750.00, '2025-10-15 17:05:17'),
+(26, 11, 'vip', 9200.00, '2025-10-15 17:05:17'),
+(27, 12, 'vip', 575.00, '2025-10-15 17:05:17'),
+(28, 13, 'vip', 17250.00, '2025-10-15 17:05:17'),
+(29, 14, 'vip', 28750.00, '2025-10-15 17:05:17'),
+(31, 1, 'corporate', 450.00, '2025-10-15 17:05:17'),
+(32, 2, 'corporate', 720.00, '2025-10-15 17:05:17'),
+(33, 3, 'corporate', 900.00, '2025-10-15 17:05:17'),
+(34, 4, 'corporate', 1080.00, '2025-10-15 17:05:17'),
+(35, 5, 'corporate', 270.00, '2025-10-15 17:05:17'),
+(36, 6, 'corporate', 360.00, '2025-10-15 17:05:17'),
+(37, 7, 'corporate', 1800.00, '2025-10-15 17:05:17'),
+(38, 8, 'corporate', 4500.00, '2025-10-15 17:05:17'),
+(39, 9, 'corporate', 1800.00, '2025-10-15 17:05:17'),
+(40, 10, 'corporate', 4500.00, '2025-10-15 17:05:17'),
+(41, 11, 'corporate', 7200.00, '2025-10-15 17:05:17'),
+(42, 12, 'corporate', 450.00, '2025-10-15 17:05:17'),
+(43, 13, 'corporate', 13500.00, '2025-10-15 17:05:17'),
+(44, 14, 'corporate', 22500.00, '2025-10-15 17:05:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_settings`
+--
+
+CREATE TABLE `system_settings` (
+  `id` int(11) NOT NULL,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `system_settings`
+--
+
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`, `description`, `updated_at`) VALUES
+(1, 'site_name', 'MediAI', 'Website name', '2025-10-15 17:04:46'),
+(2, 'maintenance_mode', '0', 'Enable/disable maintenance mode', '2025-10-15 17:04:46'),
+(3, 'registration_enabled', '1', 'Allow new user registrations', '2025-10-15 17:04:46');
 
 -- --------------------------------------------------------
 
@@ -861,28 +1325,30 @@ CREATE TABLE `users` (
   `role_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `otp` int(11) NOT NULL,
-  `status` enum('authorized','unauthorized') NOT NULL
+  `status` enum('authorized','unauthorized') NOT NULL,
+  `is_blocked` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=unblocked, 1=blocked by admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `role_id`, `created_at`, `otp`, `status`) VALUES
-(3, 'Mubasshir Ahmed', 'marnab222263@bscse.uiu.ac.bd', '12345', '01402038323', 3, '2025-04-25 21:44:38', 0, ''),
-(4, 'John Doe', 'john@gmail.com', '12345', '01345678900', 2, '2025-04-25 21:47:06', 0, 'authorized'),
-(5, 'James Anderson', 'james@gmail.com', 'james123', '01234567123', 3, '2025-04-25 22:11:51', 0, 'authorized'),
-(6, 'Tom David', 'tomdavid12@gmail.com', '$2y$10$/qX5nsACrHLShjAFVh/IHup6ZJgnNuv49/lH1NqnebkVg5QSMl2G6', '01234567899', 3, '2025-04-28 13:27:34', 0, 'authorized'),
-(7, 'United Hospital', 'unitedmedical56@gmail.com', '$2y$10$OO5KGe.m6J5r0W4R7LNWseDUrp8Y9xvx6SMOF5tk9MkLhUO.nRQO2', '01914001214', 3, '2025-04-28 13:39:58', 0, ''),
-(8, 'Abu Affan', 'aaffan222290@bscse.uiu.ac.bd', '$2y$10$zSu/R8/0McQ8qALNZJ0Vn.IPILvlA51QNJFP/pBlgD4U4uP01y0Iy', '01796651373', 1, '2025-04-28 13:46:31', 0, ''),
-(9, 'Mahdee Arnab', 'arnab0574@gmail.com', '$2y$10$i3GH8Ur.a2yJqqh6TMonO.7g.jP2s2zSORdso2FCfMabwh/xxgDNO', '01751423255', 1, '2025-04-28 16:34:00', 0, 'authorized'),
-(10, 'Nuhan', 'abuaffan@gmail.com', '$2y$10$VDfPdH8icXAphBDGyP9s2esV8wS340R7nyVFV33nXQVeRbgJBM4cq', '01796651300', 2, '2025-04-28 16:58:40', 662856, 'authorized'),
-(13, 'Nuhan', 'abuaffan1123@gmail.com', '$2y$10$3.TGFwA8e.B5lLKpxrftv.pRKQZwfvQQWiFNHutWL13xlBFqK8KUe', '01796651373', 1, '2025-04-28 17:11:51', 473792, 'authorized'),
-(14, 'Shahin Chowdhury', 'schowdhury222152@bscse.uiu.ac.bd', '$2y$10$vPtPxs8BvW4JJxCWGgJJEeHruuG/m6Gtb2hYr9jdaSrE7sucWlEVa', '01319312217', 1, '2025-04-29 17:28:05', 141920, 'authorized'),
-(15, 'Abu Affan', 'maffan222290@bscse.uiu.ac.bd', '$2y$10$WsTvFcuAJsqa8Q12vUJ4Xuh6CuSiqnVmAVqqzMTeeAIZVJcsUhTWK', '01796651373', 2, '2025-05-08 18:52:46', 534711, 'authorized'),
-(16, 'Mahdee Arnab', 'mubasshirahmed263@gmail.com', '$2y$10$whzhyLxgabPfVKC/.2gaUuRGIWmVSlvjzajHZRCCNyxTKgU3k3VBC', '01751423255', 1, '2025-06-23 09:12:02', 415621, 'authorized'),
-(17, 'John Smith', 'jsmith4250@mediai.com', '$2y$10$enzdtXnFsN9GDDXovFmA7ONRjo60K89QGACVfpN//b/vlKQtbnuYW', '01700000000', 2, '2025-10-02 09:51:06', 0, 'authorized'),
-(19, 'Nurul Huda', 'nhuda2137@mediai.com', '$2y$10$StfKW8uY5zOAARdrJj0JsuCXcSFsOEZdPCiq/HMCZiUBNlpn14XCu', '01811111111', 2, '2025-10-02 09:57:40', 0, 'authorized');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `role_id`, `created_at`, `otp`, `status`, `is_blocked`) VALUES
+(3, 'Mubasshir Ahmed', 'marnab222263@bscse.uiu.ac.bd', '12345', '01402038323', 3, '2025-04-25 21:44:38', 0, '', 0),
+(4, 'John Doe', 'john@gmail.com', '12345', '01345678900', 2, '2025-04-25 21:47:06', 0, 'authorized', 0),
+(5, 'James Anderson', 'james@gmail.com', 'james123', '01234567123', 3, '2025-04-25 22:11:51', 0, 'authorized', 0),
+(6, 'Tom David', 'tomdavid12@gmail.com', '$2y$10$/qX5nsACrHLShjAFVh/IHup6ZJgnNuv49/lH1NqnebkVg5QSMl2G6', '01234567899', 3, '2025-04-28 13:27:34', 0, 'authorized', 0),
+(7, 'United Hospital', 'unitedmedical56@gmail.com', '$2y$10$OO5KGe.m6J5r0W4R7LNWseDUrp8Y9xvx6SMOF5tk9MkLhUO.nRQO2', '01914001214', 3, '2025-04-28 13:39:58', 0, '', 0),
+(8, 'Abu Affan', 'aaffan222290@bscse.uiu.ac.bd', '$2y$10$zSu/R8/0McQ8qALNZJ0Vn.IPILvlA51QNJFP/pBlgD4U4uP01y0Iy', '01796651373', 1, '2025-04-28 13:46:31', 0, '', 0),
+(9, 'Mahdee Arnab', 'arnab0574@gmail.com', '$2y$10$i3GH8Ur.a2yJqqh6TMonO.7g.jP2s2zSORdso2FCfMabwh/xxgDNO', '01751423255', 1, '2025-04-28 16:34:00', 0, 'authorized', 0),
+(10, 'Nuhan', 'abuaffan@gmail.com', '$2y$10$VDfPdH8icXAphBDGyP9s2esV8wS340R7nyVFV33nXQVeRbgJBM4cq', '01796651300', 2, '2025-04-28 16:58:40', 662856, 'authorized', 0),
+(13, 'Nuhan', 'abuaffan1123@gmail.com', '$2y$10$3.TGFwA8e.B5lLKpxrftv.pRKQZwfvQQWiFNHutWL13xlBFqK8KUe', '01796651373', 1, '2025-04-28 17:11:51', 473792, 'authorized', 0),
+(14, 'Shahin Chowdhury', 'schowdhury222152@bscse.uiu.ac.bd', '$2y$10$vPtPxs8BvW4JJxCWGgJJEeHruuG/m6Gtb2hYr9jdaSrE7sucWlEVa', '01319312217', 1, '2025-04-29 17:28:05', 141920, 'authorized', 0),
+(15, 'Abu Affan', 'maffan222290@bscse.uiu.ac.bd', '$2y$10$WsTvFcuAJsqa8Q12vUJ4Xuh6CuSiqnVmAVqqzMTeeAIZVJcsUhTWK', '01796651373', 2, '2025-05-08 18:52:46', 534711, 'authorized', 0),
+(16, 'Mahdee Arnab', 'mubasshirahmed263@gmail.com', '$2y$10$whzhyLxgabPfVKC/.2gaUuRGIWmVSlvjzajHZRCCNyxTKgU3k3VBC', '01751423255', 1, '2025-06-23 09:12:02', 415621, 'authorized', 0),
+(17, 'John Smith', 'jsmith4250@mediai.com', '$2y$10$enzdtXnFsN9GDDXovFmA7ONRjo60K89QGACVfpN//b/vlKQtbnuYW', '01700000000', 2, '2025-10-02 09:51:06', 0, 'authorized', 0),
+(19, 'Nurul Huda', 'nhuda2137@mediai.com', '$2y$10$StfKW8uY5zOAARdrJj0JsuCXcSFsOEZdPCiq/HMCZiUBNlpn14XCu', '01811111111', 2, '2025-10-02 09:57:40', 0, 'authorized', 0),
+(999, 'System Admin', 'admin@mediai.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '01700000000', 4, '2025-10-15 17:04:55', 0, 'authorized', 0);
 
 -- --------------------------------------------------------
 
@@ -916,6 +1382,13 @@ CREATE TABLE `video_meeting` (
 --
 
 --
+-- Indexes for table `admins`
+--
+ALTER TABLE `admins`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `ai_conversations`
 --
 ALTER TABLE `ai_conversations`
@@ -944,7 +1417,17 @@ ALTER TABLE `available_hours`
 --
 ALTER TABLE `bills`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_id` (`patient_id`);
+  ADD KEY `patient_id` (`patient_id`),
+  ADD KEY `fk_bills_created_by` (`created_by`),
+  ADD KEY `fk_bills_updated_by` (`updated_by`);
+
+--
+-- Indexes for table `bill_items`
+--
+ALTER TABLE `bill_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_bill_items` (`bill_id`,`item_type`),
+  ADD KEY `idx_service_date` (`service_date`);
 
 --
 -- Indexes for table `cabins`
@@ -1000,6 +1483,24 @@ ALTER TABLE `community_members`
   ADD KEY `community_id` (`community_id`);
 
 --
+-- Indexes for table `corporate_clients`
+--
+ALTER TABLE `corporate_clients`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_corporate_active` (`is_active`);
+
+--
+-- Indexes for table `discounts`
+--
+ALTER TABLE `discounts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `applicable_patient_id` (`applicable_patient_id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_discounts_active` (`is_active`,`start_date`,`end_date`),
+  ADD KEY `idx_discounts_applicable` (`applicable_to`);
+
+--
 -- Indexes for table `disease_predictions`
 --
 ALTER TABLE `disease_predictions`
@@ -1019,6 +1520,14 @@ ALTER TABLE `doctor_hospital`
   ADD PRIMARY KEY (`id`),
   ADD KEY `doctor_id` (`doctor_id`),
   ADD KEY `hospital_id` (`hospital_id`);
+
+--
+-- Indexes for table `doctor_shares`
+--
+ALTER TABLE `doctor_shares`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_doctor_shares` (`doctor_id`,`payment_status`),
+  ADD KEY `idx_bill_shares` (`bill_id`);
 
 --
 -- Indexes for table `expertise`
@@ -1041,6 +1550,21 @@ ALTER TABLE `feedback`
 ALTER TABLE `hospitals`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `registration_number` (`registration_number`);
+
+--
+-- Indexes for table `hospital_settings`
+--
+ALTER TABLE `hospital_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_hospital_category` (`hospital_id`,`setting_category`);
+
+--
+-- Indexes for table `insurance_companies`
+--
+ALTER TABLE `insurance_companies`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_insurance_active` (`is_active`);
 
 --
 -- Indexes for table `inventory_items`
@@ -1106,10 +1630,46 @@ ALTER TABLE `meeting_code`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `packages`
+--
+ALTER TABLE `packages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_packages_active` (`is_active`),
+  ADD KEY `idx_packages_type` (`package_type`);
+
+--
+-- Indexes for table `package_items`
+--
+ALTER TABLE `package_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_package_items` (`package_id`,`item_type`);
+
+--
 -- Indexes for table `patients`
 --
 ALTER TABLE `patients`
   ADD PRIMARY KEY (`user_id`);
+
+--
+-- Indexes for table `patient_ledger`
+--
+ALTER TABLE `patient_ledger`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_patient_ledger` (`patient_id`,`created_at`),
+  ADD KEY `idx_transaction_type` (`transaction_type`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_payments_bill` (`bill_id`),
+  ADD KEY `idx_payments_patient` (`patient_id`),
+  ADD KEY `idx_payments_method` (`payment_method`),
+  ADD KEY `idx_payments_date` (`payment_date`);
 
 --
 -- Indexes for table `posts`
@@ -1142,6 +1702,17 @@ ALTER TABLE `qualifications`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `refunds`
+--
+ALTER TABLE `refunds`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `approved_by` (`approved_by`),
+  ADD KEY `processed_by` (`processed_by`),
+  ADD KEY `idx_refunds_bill` (`bill_id`),
+  ADD KEY `idx_refunds_patient` (`patient_id`),
+  ADD KEY `idx_refunds_status` (`refund_status`);
+
+--
 -- Indexes for table `risk_predictions`
 --
 ALTER TABLE `risk_predictions`
@@ -1153,6 +1724,30 @@ ALTER TABLE `risk_predictions`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `service_charges`
+--
+ALTER TABLE `service_charges`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_service_charges` (`service_type`,`is_active`),
+  ADD KEY `idx_service_department` (`department`);
+
+--
+-- Indexes for table `service_tariffs`
+--
+ALTER TABLE `service_tariffs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_service_group` (`service_id`,`price_group`),
+  ADD KEY `idx_tariff_group` (`price_group`);
+
+--
+-- Indexes for table `system_settings`
+--
+ALTER TABLE `system_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `setting_key` (`setting_key`);
 
 --
 -- Indexes for table `time_for_meeting`
@@ -1190,6 +1785,12 @@ ALTER TABLE `video_meeting`
 --
 
 --
+-- AUTO_INCREMENT for table `admins`
+--
+ALTER TABLE `admins`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `ai_conversations`
 --
 ALTER TABLE `ai_conversations`
@@ -1211,7 +1812,13 @@ ALTER TABLE `available_hours`
 -- AUTO_INCREMENT for table `bills`
 --
 ALTER TABLE `bills`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `bill_items`
+--
+ALTER TABLE `bill_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `cabins`
@@ -1256,6 +1863,18 @@ ALTER TABLE `community_members`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT for table `corporate_clients`
+--
+ALTER TABLE `corporate_clients`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `discounts`
+--
+ALTER TABLE `discounts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `disease_predictions`
 --
 ALTER TABLE `disease_predictions`
@@ -1268,6 +1887,12 @@ ALTER TABLE `doctor_hospital`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `doctor_shares`
+--
+ALTER TABLE `doctor_shares`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `expertise`
 --
 ALTER TABLE `expertise`
@@ -1278,6 +1903,18 @@ ALTER TABLE `expertise`
 --
 ALTER TABLE `feedback`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hospital_settings`
+--
+ALTER TABLE `hospital_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `insurance_companies`
+--
+ALTER TABLE `insurance_companies`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `inventory_items`
@@ -1301,7 +1938,11 @@ ALTER TABLE `inventory_transactions`
 -- AUTO_INCREMENT for table `lab_reports`
 --
 ALTER TABLE `lab_reports`
+<<<<<<< HEAD
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+=======
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+>>>>>>> 0f21c67daa7df8c7f8eff8de54b77d455440befc
 
 --
 -- AUTO_INCREMENT for table `medication`
@@ -1334,6 +1975,30 @@ ALTER TABLE `meeting_code`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `packages`
+--
+ALTER TABLE `packages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `package_items`
+--
+ALTER TABLE `package_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `patient_ledger`
+--
+ALTER TABLE `patient_ledger`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
@@ -1358,6 +2023,12 @@ ALTER TABLE `qualifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
+-- AUTO_INCREMENT for table `refunds`
+--
+ALTER TABLE `refunds`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `risk_predictions`
 --
 ALTER TABLE `risk_predictions`
@@ -1370,6 +2041,24 @@ ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `service_charges`
+--
+ALTER TABLE `service_charges`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `service_tariffs`
+--
+ALTER TABLE `service_tariffs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+
+--
+-- AUTO_INCREMENT for table `system_settings`
+--
+ALTER TABLE `system_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `time_for_meeting`
 --
 ALTER TABLE `time_for_meeting`
@@ -1379,7 +2068,7 @@ ALTER TABLE `time_for_meeting`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1000;
 
 --
 -- AUTO_INCREMENT for table `video_consultations`
@@ -1396,6 +2085,12 @@ ALTER TABLE `video_meeting`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `admins`
+--
+ALTER TABLE `admins`
+  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ai_conversations`
@@ -1422,7 +2117,15 @@ ALTER TABLE `available_hours`
 -- Constraints for table `bills`
 --
 ALTER TABLE `bills`
-  ADD CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_bills_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_bills_updated_by` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `bill_items`
+--
+ALTER TABLE `bill_items`
+  ADD CONSTRAINT `bill_items_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `cabin_bookings`
@@ -1465,6 +2168,19 @@ ALTER TABLE `community_members`
   ADD CONSTRAINT `community_members_ibfk_2` FOREIGN KEY (`community_id`) REFERENCES `community` (`id`);
 
 --
+-- Constraints for table `corporate_clients`
+--
+ALTER TABLE `corporate_clients`
+  ADD CONSTRAINT `corporate_clients_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `discounts`
+--
+ALTER TABLE `discounts`
+  ADD CONSTRAINT `discounts_ibfk_1` FOREIGN KEY (`applicable_patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `discounts_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `disease_predictions`
 --
 ALTER TABLE `disease_predictions`
@@ -1484,6 +2200,13 @@ ALTER TABLE `doctor_hospital`
   ADD CONSTRAINT `doctor_hospital_ibfk_2` FOREIGN KEY (`hospital_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `doctor_shares`
+--
+ALTER TABLE `doctor_shares`
+  ADD CONSTRAINT `doctor_shares_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `doctor_shares_ibfk_2` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `expertise`
 --
 ALTER TABLE `expertise`
@@ -1501,6 +2224,12 @@ ALTER TABLE `feedback`
 --
 ALTER TABLE `hospitals`
   ADD CONSTRAINT `hospitals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `insurance_companies`
+--
+ALTER TABLE `insurance_companies`
+  ADD CONSTRAINT `insurance_companies_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `inventory_items`
@@ -1546,10 +2275,37 @@ ALTER TABLE `medication_times`
   ADD CONSTRAINT `medication_times_ibfk_1` FOREIGN KEY (`medication_id`) REFERENCES `medication` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `packages`
+--
+ALTER TABLE `packages`
+  ADD CONSTRAINT `packages_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `package_items`
+--
+ALTER TABLE `package_items`
+  ADD CONSTRAINT `package_items_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `patients`
 --
 ALTER TABLE `patients`
   ADD CONSTRAINT `patients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `patient_ledger`
+--
+ALTER TABLE `patient_ledger`
+  ADD CONSTRAINT `patient_ledger_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `patient_ledger_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `payments_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `posts`
@@ -1578,10 +2334,31 @@ ALTER TABLE `qualifications`
   ADD CONSTRAINT `qualifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `doctors` (`user_id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `refunds`
+--
+ALTER TABLE `refunds`
+  ADD CONSTRAINT `refunds_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `refunds_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `refunds_ibfk_3` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `refunds_ibfk_4` FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `risk_predictions`
 --
 ALTER TABLE `risk_predictions`
   ADD CONSTRAINT `risk_predictions_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `service_charges`
+--
+ALTER TABLE `service_charges`
+  ADD CONSTRAINT `service_charges_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `service_tariffs`
+--
+ALTER TABLE `service_tariffs`
+  ADD CONSTRAINT `service_tariffs_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service_charges` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `time_for_meeting`
