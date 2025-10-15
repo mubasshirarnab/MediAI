@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2025 at 10:22 PM
+-- Generation Time: Oct 15, 2025 at 08:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,20 +63,26 @@ INSERT INTO `ai_conversations` (`id`, `user_id`, `title`, `created_at`, `updated
 CREATE TABLE `appointments` (
   `id` int(11) NOT NULL,
   `patient_id` int(11) DEFAULT NULL,
+  `patient_name` varchar(100) DEFAULT NULL,
   `doctor_id` int(11) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `timeslot` varchar(50) DEFAULT NULL,
-  `report_file` varchar(255) DEFAULT NULL
+  `report_file` varchar(255) DEFAULT NULL,
+  `hospital_id` int(11) DEFAULT NULL,
+  `appointment_status` enum('pending','confirmed') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`) VALUES
-(1, 14, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL);
+INSERT INTO `appointments` (`id`, `patient_id`, `patient_name`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`, `hospital_id`, `appointment_status`, `created_at`) VALUES
+(1, 14, NULL, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL, NULL, 'pending', '2025-10-15 16:59:29'),
+(5, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:51:38'),
+(6, 14, 'Samad Ali', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:52:24');
 
 -- --------------------------------------------------------
 
@@ -101,7 +107,9 @@ INSERT INTO `available_hours` (`id`, `user_id`, `hospital_id`, `day_of_week`, `s
 (5, 15, NULL, 1, '10:00:00', '19:00:00'),
 (6, 15, NULL, 2, '10:00:00', '19:00:00'),
 (7, 15, NULL, 3, '10:00:00', '19:00:00'),
-(8, 15, NULL, 4, '10:00:00', '19:00:00');
+(8, 15, NULL, 4, '10:00:00', '19:00:00'),
+(10, 19, 7, 1, '20:18:00', '23:23:00'),
+(11, 19, 7, 2, '20:20:00', '23:20:00');
 
 -- --------------------------------------------------------
 
@@ -141,8 +149,8 @@ INSERT INTO `cabins` (`cabin_id`, `cabin_number`, `type`, `price`, `availability
 (1, '1', 'general', 250.00, 1, '2025-10-03 19:39:07', '2025-10-03 19:39:07'),
 (2, '2', 'deluxe', 500.00, 1, '2025-10-03 19:39:24', '2025-10-03 19:39:24'),
 (3, '3', 'ICU', 1000.00, 1, '2025-10-03 19:39:44', '2025-10-03 19:39:44'),
-(4, '4', 'general', 100.00, 0, '2025-10-03 19:40:01', '2025-10-03 19:40:01'),
-(7, '6', 'deluxe', 200.00, 1, '2025-10-03 20:00:49', '2025-10-03 20:00:49');
+(7, '6', 'deluxe', 200.00, 1, '2025-10-03 20:00:49', '2025-10-03 20:00:49'),
+(9, '7', 'general', 10.00, 1, '2025-10-08 18:24:35', '2025-10-08 18:24:35');
 
 -- --------------------------------------------------------
 
@@ -385,7 +393,8 @@ INSERT INTO `expertise` (`id`, `user_id`, `expertise_name`) VALUES
 (21, 15, 'Pediatric Cardiology'),
 (22, 15, 'Echocardiography'),
 (23, 15, 'Chronic Disease Management'),
-(24, 15, 'Preventive Medicine');
+(24, 15, 'Preventive Medicine'),
+(25, 19, 'Hypertension, ECG Interpretation');
 
 -- --------------------------------------------------------
 
@@ -517,6 +526,31 @@ INSERT INTO `inventory_transactions` (`id`, `item_id`, `hospital_id`, `transacti
 (1, 41, 7, 'in', 5, '2025-07-01 19:55:26', 'Checked'),
 (2, 42, 7, 'in', 100, '2025-07-01 19:57:46', ''),
 (3, 54, 7, 'in', 10, '2025-07-01 20:14:02', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `lab_reports`
+--
+
+CREATE TABLE `lab_reports` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `test_name` varchar(255) NOT NULL,
+  `report_file` varchar(255) NOT NULL,
+  `uploaded_by` int(11) NOT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `report_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `lab_reports`
+--
+
+INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uploaded_by`, `uploaded_at`, `report_date`) VALUES
+(1, 16, 'blood count', 'uploads/reports/Assignment_3__1__pid16_20251008205617.pdf', 7, '2025-10-08 18:56:17', '2025-10-08'),
+(2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
+(3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
 
 -- --------------------------------------------------------
 
@@ -727,7 +761,10 @@ CREATE TABLE `pricing` (
 INSERT INTO `pricing` (`id`, `user_id`, `service_type`, `price`) VALUES
 (4, 15, 'Standard', 2000.00),
 (5, 15, 'Second Visit', 1000.00),
-(6, 15, 'Report Checkup', 500.00);
+(6, 15, 'Report Checkup', 500.00),
+(13, 19, 'Standard', 1500.00),
+(14, 19, 'Second Visit', 1000.00),
+(15, 19, 'Report Checkup', 500.00);
 
 -- --------------------------------------------------------
 
@@ -750,7 +787,8 @@ CREATE TABLE `qualifications` (
 INSERT INTO `qualifications` (`id`, `user_id`, `qualification`, `institute`, `year_obtained`) VALUES
 (16, 15, 'MBBS', 'Dhaka Medical College', '2015'),
 (17, 15, 'MD (Cardiology)', 'National Heart Institute', '2019'),
-(18, 15, 'MPH', 'BRAC University', '2021');
+(18, 15, 'MPH', 'BRAC University', '2021'),
+(19, 19, 'MBBS, MD', 'Dhaka Medical College', '2015');
 
 -- --------------------------------------------------------
 
@@ -890,7 +928,8 @@ ALTER TABLE `ai_conversations`
 ALTER TABLE `appointments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `doctor_id` (`doctor_id`);
+  ADD KEY `doctor_id` (`doctor_id`),
+  ADD KEY `fk_hospital` (`hospital_id`);
 
 --
 -- Indexes for table `available_hours`
@@ -1026,6 +1065,13 @@ ALTER TABLE `inventory_transactions`
   ADD KEY `hospital_id` (`hospital_id`);
 
 --
+-- Indexes for table `lab_reports`
+--
+ALTER TABLE `lab_reports`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_patient` (`patient_id`);
+
+--
 -- Indexes for table `medication`
 --
 ALTER TABLE `medication`
@@ -1153,13 +1199,13 @@ ALTER TABLE `ai_conversations`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `available_hours`
 --
 ALTER TABLE `available_hours`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `bills`
@@ -1171,7 +1217,7 @@ ALTER TABLE `bills`
 -- AUTO_INCREMENT for table `cabins`
 --
 ALTER TABLE `cabins`
-  MODIFY `cabin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `cabin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `cabin_bookings`
@@ -1225,7 +1271,7 @@ ALTER TABLE `doctor_hospital`
 -- AUTO_INCREMENT for table `expertise`
 --
 ALTER TABLE `expertise`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -1249,6 +1295,12 @@ ALTER TABLE `inventory_stock`
 -- AUTO_INCREMENT for table `inventory_transactions`
 --
 ALTER TABLE `inventory_transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `lab_reports`
+--
+ALTER TABLE `lab_reports`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
@@ -1297,13 +1349,13 @@ ALTER TABLE `post_likes`
 -- AUTO_INCREMENT for table `pricing`
 --
 ALTER TABLE `pricing`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `qualifications`
 --
 ALTER TABLE `qualifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `risk_predictions`
@@ -1356,7 +1408,8 @@ ALTER TABLE `ai_conversations`
 --
 ALTER TABLE `appointments`
   ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_hospital` FOREIGN KEY (`hospital_id`) REFERENCES `hospitals` (`user_id`);
 
 --
 -- Constraints for table `available_hours`
@@ -1555,32 +1608,6 @@ ALTER TABLE `video_consultations`
 ALTER TABLE `video_meeting`
   ADD CONSTRAINT `fk_vm_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_vm_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `system_settings`
---
-
-CREATE TABLE `system_settings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `setting_key` varchar(100) NOT NULL,
-  `setting_value` text DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `setting_key` (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `system_settings`
---
-
-INSERT INTO `system_settings` (`setting_key`, `setting_value`, `description`) VALUES
-('site_name', 'MediAI', 'Website name'),
-('maintenance_mode', '0', 'Enable/disable maintenance mode'),
-('registration_enabled', '1', 'Allow new user registrations');
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -423,6 +423,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         </div>
 
+        <!-- Availability -->
         <div class="column">
           <h3>Availability</h3>
           <div class="hospital-schedule">
@@ -533,10 +534,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     };
 
     document.addEventListener('DOMContentLoaded', function() {
-      // Fetch associated hospitals
+      // Fetch associated hospitals 
       fetch('get_doctor_hospitals.php')
         .then(res => res.json())
         .then(hospitals => {
+          console.log('Hospitals response:', hospitals); // Debug log
           const select = document.getElementById('hospitalSelect');
           hospitals.forEach(hospital => {
             const option = document.createElement('option');
@@ -544,6 +546,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             option.textContent = hospital.name;
             select.appendChild(option);
           });
+        })
+        .catch(err => {
+          console.error('Error fetching hospitals:', err); // Error logging
         });
 
       // Hospital select change handler

@@ -724,6 +724,34 @@ if (isset($_SESSION['user_id'])) {
     .cal-unavailable {
       background: #0a0c1a;
     }
+
+    /* Add to your existing <style> section */
+    .cal-day.selected {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    #timeSlotSection select {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+
+    #timeSlotSection select:hover {
+      border-color: #667eea;
+    }
+
+    #timeSlotSection select option {
+      background: #1a1c2e;
+      color: white;
+      padding: 10px;
+    }
   </style>
 </head>
 
@@ -841,7 +869,7 @@ if (isset($_SESSION['user_id'])) {
           <div id="selectedDateDisplay" style="color:#bdbdbd; margin-top:8px; font-size:0.95rem;"></div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="timeSlotSection" style="display: none;">
           <label for="appointment_time">Preferred Time Slot</label>
           <select id="appointment_time" name="appointment_time" required>
             <option value="">Select Time</option>
@@ -946,21 +974,34 @@ if (isset($_SESSION['user_id'])) {
 
         const doctorId = document.getElementById('doctor_id').value;
         fetch(`get_available_slots.php?doctor_id=${doctorId}&hospital_id=${hospitalId}`)
-          .then(r => r.json())
+          .then(r => {
+            if (!r.ok) {
+              throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            return r.json();
+          })
           .then(resp => {
+            console.log('Available slots response:', resp); // Debug log
             if (!resp.success) {
-              document.getElementById('calendarContainer').innerHTML = '<div style="color:#ccc">' + (resp.message || 'No availability found') + '</div>';
+              document.getElementById('calendarContainer').innerHTML =
+                `<div style="color:#ccc">${resp.message || 'No availability found'}</div>`;
               window.__available_time_map = {};
               return;
             }
 
-            // render calendar and keep time map
+            if (!resp.available_days || resp.available_days.length === 0) {
+              document.getElementById('calendarContainer').innerHTML =
+                '<div style="color:#ccc">No available time slots found for this hospital.</div>';
+              return;
+            }
+
             renderCalendar(resp.available_days);
             window.__available_time_map = resp.time_map || {};
           })
           .catch(err => {
-            console.error('Error fetching availability', err);
-            document.getElementById('calendarContainer').innerHTML = '<div style="color:#f66">Error loading availability</div>';
+            console.error('Error fetching availability:', err);
+            document.getElementById('calendarContainer').innerHTML =
+              `<div style="color:#f66">Error loading availability: ${err.message}</div>`;
           });
       };
     }
@@ -995,11 +1036,35 @@ if (isset($_SESSION['user_id'])) {
         if (availJsSet.has(dayIdx)) {
           btn.classList.add('cal-available');
           btn.onclick = function() {
-            const dbDay = dayIdx + 1; // DB uses 1..7
+            // Highlight selected date
+            document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            const dbDay = dayIdx + 1; // Convert to 1-7 for DB
             document.getElementById('appointment_day').value = dbDay;
             document.getElementById('appointment_date').value = btn.dataset.date;
-            document.getElementById('selectedDateDisplay').textContent = 'Selected: ' + dt.toLocaleDateString();
-            populateTimesForDay(dbDay);
+            document.getElementById('selectedDateDisplay').textContent =
+              'Selected: ' + dt.toLocaleDateString();
+
+            // Fetch and populate time slots
+            const timeSlots = window.__available_time_map[dbDay] || [];
+            const timeSelect = document.getElementById('appointment_time');
+            timeSelect.innerHTML = '<option value="">Select Time</option>';
+
+            timeSlots.forEach(time => {
+              const opt = document.createElement('option');
+              opt.value = time;
+              // Convert 24h to 12h format for display
+              const timeDisplay = new Date(`2000-01-01T${time}`).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              opt.textContent = timeDisplay;
+              timeSelect.appendChild(opt);
+            });
+
+            // Show time slot section
+            document.getElementById('timeSlotSection').style.display = 'block';
           };
         } else {
           btn.classList.add('cal-unavailable');
@@ -1023,7 +1088,6 @@ if (isset($_SESSION['user_id'])) {
       });
     }
 
-    /* form submission remains same as before */
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const submitBtn = this.querySelector('.submit-btn');
@@ -1032,22 +1096,32 @@ if (isset($_SESSION['user_id'])) {
       submitBtn.disabled = true;
 
       const formData = new FormData(this);
+
+      // Debug log
+      console.log('Form Data:', Object.fromEntries(formData));
+
       fetch('book_appointment.php', {
           method: 'POST',
           body: formData
         })
-        .then(r => r.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
+          console.log('Server response:', data);
           if (data.success) {
-            alert('Appointment booked successfully!');
+            alert(data.message);
             closeAppointmentModal();
           } else {
-            alert('Error: ' + (data.message || 'Failed to book appointment'));
+            throw new Error(data.message || 'Failed to book appointment');
           }
         })
-        .catch(err => {
-          console.error(err);
-          alert('Error: Failed to book appointment');
+        .catch(error => {
+          console.error('Booking error:', error);
+          alert('Error: ' + error.message);
         })
         .finally(() => {
           submitBtn.innerHTML = originalText;

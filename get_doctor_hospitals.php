@@ -4,39 +4,35 @@ require_once 'dbConnect.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor') {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
+if (!isset($_GET['doctor_id'])) {
+    echo json_encode(['error' => 'Doctor ID is required']);
     exit;
 }
 
-$doctorUserId = $_SESSION['user_id'];
+$doctor_id = intval($_GET['doctor_id']);
 
-// doctor_hospital.doctor_id references doctors.user_id
-$sql = "SELECT u.id AS id, u.name AS name
-        FROM doctor_hospital dh
-        JOIN users u ON u.id = dh.hospital_id
-        WHERE dh.doctor_id = ?
-        ORDER BY u.name";
+// Get hospitals where this doctor works
+$query = "SELECT u.id, u.name 
+          FROM users u 
+          JOIN doctor_hospital dh ON u.id = dh.hospital_id 
+          WHERE dh.doctor_id = ? 
+          ORDER BY u.name";
 
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to prepare statement']);
-    exit;
+try {
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $doctor_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $hospitals = [];
+    while ($row = $result->fetch_assoc()) {
+        $hospitals[] = [
+            'id' => (int)$row['id'],
+            'name' => $row['name']
+        ];
+    }
+
+    echo json_encode($hospitals);
+} catch (Exception $e) {
+    echo json_encode(['error' => $e->getMessage()]);
 }
-
-$stmt->bind_param('i', $doctorUserId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$hospitals = [];
-while ($row = $result->fetch_assoc()) {
-    $hospitals[] = [
-        'id' => (int)$row['id'],
-        'name' => $row['name'],
-    ];
-}
-
-echo json_encode($hospitals);
-exit;
