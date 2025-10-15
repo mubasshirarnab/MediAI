@@ -571,7 +571,7 @@ $total_patients = $conn->query($patients_query)->fetch_assoc()['total_patients']
                 <i class="fas fa-cog" style="font-size: 2.5rem; color: #667eea; margin-bottom: 15px;"></i>
                 <h3>Settings</h3>
                 <p>Configure hospital settings, preferences, and system parameters</p>
-                <a href="hospital_settings.php">Settings</a>
+                <a href="hospital_settings/settings.php">Settings</a>
             </div>
         </div>
     </div>
