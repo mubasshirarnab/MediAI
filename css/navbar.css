@@ -51,6 +51,22 @@ body {
   opacity: 1;
   color: #685da5;
 }
+
+/* Active page indicator */
+.navbar-link.active {
+  color: #685da5;
+  font-weight: 600;
+}
+.navbar-link.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: #685da5;
+  border-radius: 2px;
+}
 .navbar-bell {
   font-size: 22px;
   color: #ffffff; /* now this will actually make the bell white */

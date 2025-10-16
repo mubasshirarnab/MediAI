@@ -366,10 +366,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body style="background-color: #000117">
-  <iframe
-    src="navbar.php"
-    frameborder="0"
-    style="width: 100%; height: 70px"></iframe>
   <?php
 
   include_once 'navbar.php';
