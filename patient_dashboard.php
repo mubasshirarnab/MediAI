@@ -366,7 +366,6 @@ if (isset($_SESSION['user_id'])) {
 </head>
 
 <body>
-    <iframe src="navbar.php" frameborder="0" style="width: 100%; height: 70px;"></iframe>
     <?php
 
     include_once 'navbar.php';

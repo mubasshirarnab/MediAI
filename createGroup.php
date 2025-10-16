@@ -175,10 +175,6 @@
     exit();
   }
   ?>
-  <iframe
-    src="navbar.php"
-    frameborder="0"
-    style="width: 100%; height: 80px"></iframe>
   <?php require_once 'navbar.php'; ?>
 
   <div class="main-layout">

@@ -31,7 +31,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
   </style>
 </head>
 <body>
-  <iframe src="hospitalnav.php" frameborder="0" style="width:100%;height:80px"></iframe>
+  <?php require_once 'hospitalnav.php'; ?>
   <div class="container">
     <div id="root"></div>
   </div>

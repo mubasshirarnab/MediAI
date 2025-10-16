@@ -133,11 +133,6 @@
     $posts = $result->fetch_all(MYSQLI_ASSOC);
   }
   ?>
-  <iframe
-    src="Navbar\navbar.html"
-    frameborder="0"
-    style="width: 100%; height: 80px"></iframe>
-
   <?php require_once 'navbar.php'; ?>
 
   <div class="main-layout">

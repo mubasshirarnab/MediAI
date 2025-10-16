@@ -68,13 +68,10 @@ if ($result) {
 </head>
 
 <body>
-  <iframe
-    src="<?php echo (isset($_SESSION['role']) && $_SESSION['role'] == 'hospital') ? 'hospitalnav.php' : 'navbar.php'; ?>"
-    frameborder="0"
-    style="width: 100%; height: 80px"></iframe>
   <?php
   require_once (isset($_SESSION['role']) && $_SESSION['role'] == 'hospital') ? 'hospitalnav.php'  : 'navbar.php';
   ?>
+
   <div class="main-layout">
 
     <h1 class=" mainTitle">YOUR 24/7 MEDICAL</h1>

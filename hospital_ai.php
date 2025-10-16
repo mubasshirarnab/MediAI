@@ -11,11 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <iframe
-      src="Navbar\navbar.html"
-      frameborder="0"
-      style="width: 100%; height: 80px"
-    ></iframe>
     <?php include 'hospitalnav.php'; ?>
 
     <main class="hospital-ai-container">
