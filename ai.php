@@ -481,26 +481,15 @@ if ($stmt_conv_list) {
       }
 
       let userOriginalMessage = inputElement.value.trim();
-       console.log("User message received");
+      console.log("User original message:", userOriginalMessage);
       if (!userOriginalMessage) {
         console.log("Empty message, returning.");
         return;
       }
 
-       let messageForAI = `You are MediAI, a helpful medical assistant. Please respond to the following user query naturally and conversationally. 
+      let messageForAI = userOriginalMessage + ". This is the prompt. If the prompt is related to 'Medical Assistance', 'Mental Consultancy', or 'Greetings', then just respond to the prompt. Otherwise, show this message: 'Hi there! 👋 I'm here to help with Mental health support, and Physical health-related questions only. If you have other queries, please consult a medical expert or explore other features of MediAI. Thanks for understanding! 💙'";
 
-User Query: "${userOriginalMessage}"
-
-Guidelines:
-- If the query is about medical assistance, mental health, or general greetings, provide a helpful and personalized response
-- Be conversational and empathetic
-- If the query is not medical-related, politely redirect to medical topics
-- Vary your responses to avoid repetition
-- Keep responses concise but helpful
-
-Please respond to: ${userOriginalMessage}`;
-
-       console.log("Processing user message...");
+      console.log("Message for AI:", messageForAI);
 
       // Hide initial view and show chat container
       chatSection.classList.add("chat-active");
@@ -520,111 +509,31 @@ Please respond to: ${userOriginalMessage}`;
       loadingMessage.style.display = "flex";
       console.log("Loading message shown.");
 
-       try {
-         console.log("Attempting to fetch from OpenRouter API...");
-         
-         // Get conversation history if available
-         let conversationHistory = [];
-         if (currentConversationId) {
-           const messagesDiv = document.getElementById("chat-messages");
-           if (messagesDiv) {
-             const messages = messagesDiv.querySelectorAll('.message');
-             messages.forEach(msg => {
-               const messageContent = msg.querySelector('.message-content');
-               if (messageContent) {
-                 const role = msg.classList.contains('user') ? 'user' : 'assistant';
-                 conversationHistory.push({
-                   role: role,
-                   content: messageContent.textContent || messageContent.innerText
-                 });
-               }
-             });
-           }
-         }
-         
-         // Prepare messages array with conversation history
-         let messages = [
-           {
-             role: "system",
-             content: "You are MediAI, a specialized medical assistant. You ONLY respond to medical, health, mental health, and wellness related questions. If someone asks about non-medical topics (like technology, politics, entertainment, etc.), politely redirect them back to medical topics. Always remind users that you are here specifically for medical assistance and health-related support. Be conversational, empathetic, and helpful only for medical queries. Respond in English only."
-           }
-         ];
-         
-         // Add conversation history (last 10 messages to keep context manageable)
-         if (conversationHistory.length > 0) {
-           const recentHistory = conversationHistory.slice(-10);
-           messages = messages.concat(recentHistory);
-         }
-         
-         // Add current user message with medical context (without showing user query)
-         let medicalPrompt = `IMPORTANT: You are MediAI, a medical assistant. Only respond if this is a medical, health, mental health, or wellness related question. 
-
-If the query is NOT medical-related (like technology, politics, entertainment, sports, etc.), respond with: "I'm MediAI, a health assistant. I can only help with medical, health, mental health, and wellness related questions. If you have any health-related concerns, I'd be happy to help you. 😊"
-
-If it IS medical-related, provide helpful medical guidance while reminding the user to consult healthcare professionals for serious concerns.
-
-User Query: ${userOriginalMessage}`;
-         
-         messages.push({
-           role: "user",
-           content: medicalPrompt
-         });
-         
-         const response = await fetch(
-           "https://openrouter.ai/api/v1/chat/completions", {
-             method: "POST",
-             headers: {
-               Authorization: "Bearer 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",
-               "Content-Type": "application/json",
-               "X-Title": "MediAI_Chat",
-             },
-             body: JSON.stringify({
-               model: "microsoft/phi-3-mini-128k-instruct",
-               messages: messages,
-               temperature: 0.7, // Add randomness to avoid repetitive responses
-               max_tokens: 500
-             }),
-           }
-         );
+      try {
+        console.log("Attempting to fetch from OpenRouter API...");
+        const response = await fetch(
+          "https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer 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",
+              "Content-Type": "application/json",
+              "X-Title": "MediAI_Chat",
+            },
+            body: JSON.stringify({
+              model: "deepseek/deepseek-r1:free",
+              messages: [{
+                role: "user",
+                content: messageForAI
+              }],
+            }),
+          }
+        );
         console.log("OpenRouter API response status:", response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
           console.error("OpenRouter API Error Text:", errorText);
-          
-           // Handle rate limit or API errors with fallback response
-           loadingMessage.style.display = "none";
-           let fallbackResponse = "I apologize, but I'm experiencing technical difficulties right now. Please try again in a moment, or feel free to consult with a medical professional for urgent health concerns. 💙";
-           
-           if (response.status === 429) {
-             fallbackResponse = "I'm currently experiencing high demand. Please wait a moment and try again, or contact a medical professional for immediate assistance. Thank you for your patience! 💙";
-           } else if (response.status === 402 || response.status === 401) {
-             fallbackResponse = "I'm temporarily unavailable due to service limitations. For medical assistance, please consult with a healthcare professional or use other MediAI features. Thank you for understanding! 💙";
-           } else if (response.status >= 500) {
-             fallbackResponse = "Our AI service is temporarily down. Please try again later or consult with a medical professional for immediate assistance. 💙";
-           }
-          
-          addMessageToDisplay(fallbackResponse, 'ai', true);
-          
-          // Still try to save the conversation with fallback response
-          try {
-            const saveFormData = new FormData();
-            saveFormData.append('action', 'save_chat');
-            saveFormData.append('prompt', userOriginalMessage);
-            saveFormData.append('response', fallbackResponse);
-            if (currentConversationId) {
-              saveFormData.append('conversation_id', currentConversationId);
-            }
-            
-            await fetch('ai.php', {
-              method: 'POST',
-              body: saveFormData,
-            });
-          } catch (saveError) {
-            console.error("Failed to save fallback response:", saveError);
-          }
-          
-          return;
+          throw new Error(`API request failed with status ${response.status}: ${errorText}`);
         }
 
         const data = await response.json();
