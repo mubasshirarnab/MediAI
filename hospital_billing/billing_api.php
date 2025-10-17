@@ -57,9 +57,29 @@ try {
                 send_json(['success' => false, 'error' => 'Invalid patient ID'], 400);
             }
             
-            $sql = "SELECT pl.*, u.name as created_by_name 
+            // Enhanced query to get comprehensive ledger data
+            $sql = "SELECT 
+                        pl.*,
+                        u.name as created_by_name,
+                        CASE 
+                            WHEN pl.reference_type = 'bill' THEN b.bill_type
+                            WHEN pl.reference_type = 'payment' THEN p.payment_method
+                            ELSE NULL
+                        END as reference_details,
+                        CASE 
+                            WHEN pl.reference_type = 'bill' THEN b.total_amount
+                            WHEN pl.reference_type = 'payment' THEN p.payment_amount
+                            ELSE NULL
+                        END as reference_amount,
+                        CASE 
+                            WHEN pl.reference_type = 'bill' THEN b.status
+                            WHEN pl.reference_type = 'payment' THEN p.payment_status
+                            ELSE NULL
+                        END as reference_status
                     FROM patient_ledger pl 
                     LEFT JOIN users u ON pl.created_by = u.id 
+                    LEFT JOIN bills b ON pl.reference_type = 'bill' AND pl.reference_id = b.id
+                    LEFT JOIN payments p ON pl.reference_type = 'payment' AND pl.reference_id = p.id
                     WHERE pl.patient_id = ? 
                     ORDER BY pl.created_at DESC 
                     LIMIT ? OFFSET ?";
@@ -81,9 +101,37 @@ try {
             $count_stmt->execute();
             $total = $count_stmt->get_result()->fetch_assoc()['total'];
             
+            // Get patient financial summary
+            $summary_sql = "SELECT 
+                                COUNT(CASE WHEN transaction_type = 'charge' THEN 1 END) as total_charges,
+                                COUNT(CASE WHEN transaction_type = 'payment' THEN 1 END) as total_payments,
+                                SUM(CASE WHEN transaction_type = 'charge' THEN amount ELSE 0 END) as total_charged,
+                                SUM(CASE WHEN transaction_type = 'payment' THEN amount ELSE 0 END) as total_paid,
+                                SUM(CASE WHEN transaction_type = 'refund' THEN amount ELSE 0 END) as total_refunded,
+                                SUM(CASE WHEN transaction_type = 'discount' THEN amount ELSE 0 END) as total_discounted
+                            FROM patient_ledger 
+                            WHERE patient_id = ?";
+            
+            $summary_stmt = $conn->prepare($summary_sql);
+            $summary_stmt->bind_param('i', $patient_id);
+            $summary_stmt->execute();
+            $summary = $summary_stmt->get_result()->fetch_assoc();
+            
+            // Calculate current balance
+            $current_balance = ($summary['total_charged'] ?? 0) - ($summary['total_paid'] ?? 0) - ($summary['total_refunded'] ?? 0) - ($summary['total_discounted'] ?? 0);
+            
             send_json([
                 'success' => true,
                 'data' => $ledger,
+                'summary' => [
+                    'total_charges' => intval($summary['total_charges'] ?? 0),
+                    'total_payments' => intval($summary['total_payments'] ?? 0),
+                    'total_charged' => floatval($summary['total_charged'] ?? 0),
+                    'total_paid' => floatval($summary['total_paid'] ?? 0),
+                    'total_refunded' => floatval($summary['total_refunded'] ?? 0),
+                    'total_discounted' => floatval($summary['total_discounted'] ?? 0),
+                    'current_balance' => floatval($current_balance)
+                ],
                 'pagination' => [
                     'page' => $page,
                     'limit' => $limit,
@@ -120,6 +168,7 @@ try {
             
             $patient_id = intval($data['patient_id'] ?? 0);
             $bill_type = $data['bill_type'] ?? 'final';
+            $issued_date = $data['issued_date'] ?? date('Y-m-d'); // Use provided date or current date
             $items = $data['items'] ?? [];
             $discount_id = intval($data['discount_id'] ?? 0);
             $insurance_id = intval($data['insurance_id'] ?? 0);
@@ -127,6 +176,11 @@ try {
             
             if ($patient_id <= 0 || empty($items)) {
                 send_json(['success' => false, 'error' => 'Invalid data'], 400);
+            }
+            
+            // Validate date format
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $issued_date)) {
+                $issued_date = date('Y-m-d'); // Fallback to current date
             }
             
             $conn->begin_transaction();
@@ -158,12 +212,12 @@ try {
                 
                 $total_amount = $subtotal - $discount_amount;
                 
-                // Create bill
-                $bill_sql = "INSERT INTO bills (patient_id, amount, status, bill_type, discount_amount, total_amount, balance_amount, insurance_claim_id, corporate_client_id, created_by) 
-                            VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)";
+                // Create bill with provided or current date
+                $bill_sql = "INSERT INTO bills (patient_id, amount, status, bill_type, issued_date, discount_amount, total_amount, balance_amount, insurance_claim_id, corporate_client_id, created_by) 
+                            VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)";
                 
                 $bill_stmt = $conn->prepare($bill_sql);
-                $bill_stmt->bind_param('iisddddii', $patient_id, $subtotal, $bill_type, $discount_amount, $total_amount, $total_amount, $insurance_id, $corporate_id, $_SESSION['user_id']);
+                $bill_stmt->bind_param('iissddddii', $patient_id, $subtotal, $bill_type, $issued_date, $discount_amount, $total_amount, $total_amount, $insurance_id, $corporate_id, $_SESSION['user_id']);
                 $bill_stmt->execute();
                 
                 $bill_id = $conn->insert_id;
@@ -705,6 +759,49 @@ try {
                 ]
             ]);
 
+        case 'test_database_tables':
+            require_method('GET');
+            
+            try {
+                // Test if tables exist
+                $tables_to_check = ['users', 'bills', 'bill_items'];
+                $table_status = [];
+                
+                foreach ($tables_to_check as $table) {
+                    $check_sql = "SHOW TABLES LIKE ?";
+                    $check_stmt = $conn->prepare($check_sql);
+                    $check_stmt->bind_param('s', $table);
+                    $check_stmt->execute();
+                    $result = $check_stmt->get_result();
+                    $table_status[$table] = $result->num_rows > 0;
+                }
+                
+                // Test if we can query users table
+                $test_sql = "SELECT COUNT(*) as count FROM users WHERE role_id = 1";
+                $test_stmt = $conn->prepare($test_sql);
+                $test_stmt->execute();
+                $patient_count = $test_stmt->get_result()->fetch_assoc()['count'];
+                
+                // Test if we can query bills table
+                $bills_sql = "SELECT COUNT(*) as count FROM bills";
+                $bills_stmt = $conn->prepare($bills_sql);
+                $bills_stmt->execute();
+                $bills_count = $bills_stmt->get_result()->fetch_assoc()['count'];
+                
+                send_json([
+                    'success' => true,
+                    'database_connection' => true,
+                    'tables_exist' => $table_status,
+                    'patient_count' => $patient_count,
+                    'bills_count' => $bills_count,
+                    'message' => 'Database tables are accessible'
+                ]);
+                
+            } catch (Exception $e) {
+                error_log("Database test error: " . $e->getMessage());
+                send_json(['success' => false, 'error' => 'Database test failed: ' . $e->getMessage()], 500);
+            }
+
         case 'patient_discharge_summary':
             require_method('GET');
             $patient_id = intval($_GET['patient_id'] ?? 0);
@@ -713,46 +810,250 @@ try {
                 send_json(['success' => false, 'error' => 'Invalid patient ID'], 400);
             }
 
-            // Get patient information
-            $patient_sql = "SELECT id, name, email, phone FROM users WHERE id = ? AND role_id = 1";
-            $patient_stmt = $conn->prepare($patient_sql);
-            $patient_stmt->bind_param('i', $patient_id);
-            $patient_stmt->execute();
-            $patient_result = $patient_stmt->get_result();
-            $patient_info = $patient_result->fetch_assoc();
+            try {
+                // Get patient information
+                $patient_sql = "SELECT id, name, email, phone FROM users WHERE id = ? AND role_id = 1";
+                $patient_stmt = $conn->prepare($patient_sql);
+                if (!$patient_stmt) {
+                    send_json(['success' => false, 'error' => 'Database error: Failed to prepare patient query'], 500);
+                }
+                
+                $patient_stmt->bind_param('i', $patient_id);
+                $patient_stmt->execute();
+                $patient_result = $patient_stmt->get_result();
+                $patient_info = $patient_result->fetch_assoc();
 
-            if (!$patient_info) {
-                send_json(['success' => false, 'error' => 'Patient not found'], 404);
+                if (!$patient_info) {
+                    send_json(['success' => false, 'error' => 'Patient not found'], 404);
+                }
+
+                // Get active cabin booking for this patient
+                $cabin_booking_sql = "SELECT 
+                    cb.booking_id,
+                    cb.user_id,
+                    cb.cabin_id,
+                    cb.booking_date,
+                    cb.check_in,
+                    cb.check_out,
+                    cb.status as booking_status,
+                    c.cabin_number,
+                    c.type as cabin_type,
+                    c.price as daily_rate,
+                    DATEDIFF(CURDATE(), cb.check_in) as days_stayed,
+                    (DATEDIFF(CURDATE(), cb.check_in) * c.price) as cabin_total_cost
+                FROM cabin_bookings cb
+                JOIN cabins c ON cb.cabin_id = c.cabin_id
+                WHERE cb.user_id = ? AND cb.status = 'booked'";
+
+                $cabin_stmt = $conn->prepare($cabin_booking_sql);
+                if (!$cabin_stmt) {
+                    send_json(['success' => false, 'error' => 'Database error: Failed to prepare cabin query'], 500);
+                }
+                
+                $cabin_stmt->bind_param('i', $patient_id);
+                $cabin_stmt->execute();
+                $cabin_result = $cabin_stmt->get_result();
+                $cabin_booking = $cabin_result->fetch_assoc();
+
+                // Get all medical charges for this patient
+                $charges_sql = "SELECT 
+                    bi.*,
+                    b.bill_type,
+                    b.issued_date,
+                    b.status,
+                    b.amount as bill_amount,
+                    b.total_amount as bill_total_amount
+                FROM bill_items bi
+                JOIN bills b ON bi.bill_id = b.id
+                WHERE b.patient_id = ?
+                ORDER BY b.issued_date DESC, bi.service_date DESC";
+
+                $charges_stmt = $conn->prepare($charges_sql);
+                if (!$charges_stmt) {
+                    send_json(['success' => false, 'error' => 'Database error: Failed to prepare charges query'], 500);
+                }
+                
+                $charges_stmt->bind_param('i', $patient_id);
+                $charges_stmt->execute();
+                $charges_result = $charges_stmt->get_result();
+
+                $charges = [];
+                while ($row = $charges_result->fetch_assoc()) {
+                    $charges[] = $row;
+                }
+
+                // Get total amount from bills table for this patient
+                $bills_total_sql = "SELECT 
+                    SUM(COALESCE(total_amount, amount, 0)) as total_bills_amount,
+                    SUM(CASE WHEN status = 'paid' THEN COALESCE(total_amount, amount, 0) ELSE 0 END) as paid_amount,
+                    SUM(CASE WHEN status != 'paid' OR status IS NULL THEN COALESCE(total_amount, amount, 0) ELSE 0 END) as unpaid_amount,
+                    COUNT(*) as total_bills
+                FROM bills 
+                WHERE patient_id = ?";
+
+                $bills_total_stmt = $conn->prepare($bills_total_sql);
+                if (!$bills_total_stmt) {
+                    send_json(['success' => false, 'error' => 'Database error: Failed to prepare bills total query'], 500);
+                }
+                
+                $bills_total_stmt->bind_param('i', $patient_id);
+                $bills_total_stmt->execute();
+                $bills_total_result = $bills_total_stmt->get_result();
+                $bills_summary = $bills_total_result->fetch_assoc();
+
+                // Add cabin charges if patient has active booking
+                if ($cabin_booking) {
+                    $cabin_charges = [
+                        'id' => 'cabin_' . $cabin_booking['booking_id'],
+                        'bill_id' => null,
+                        'item_type' => 'room',
+                        'item_name' => 'Cabin Accommodation',
+                        'item_description' => "Cabin #{$cabin_booking['cabin_number']} ({$cabin_booking['cabin_type']}) - {$cabin_booking['days_stayed']} days",
+                        'quantity' => $cabin_booking['days_stayed'],
+                        'unit_price' => $cabin_booking['daily_rate'],
+                        'total_price' => $cabin_booking['cabin_total_cost'],
+                        'service_date' => $cabin_booking['check_in'],
+                        'bill_type' => 'cabin_booking',
+                        'issued_date' => $cabin_booking['booking_date'],
+                        'status' => 'pending'
+                    ];
+                    array_unshift($charges, $cabin_charges); // Add cabin charges at the beginning
+                }
+
+                // Calculate grand total safely
+                $grand_total = 0;
+                if (!empty($charges)) {
+                    $grand_total = array_sum(array_column($charges, 'total_price'));
+                }
+
+                send_json([
+                    'success' => true,
+                    'patient_info' => $patient_info,
+                    'cabin_booking' => $cabin_booking,
+                    'charges' => $charges,
+                    'total_charges' => count($charges),
+                    'grand_total' => $grand_total,
+                    'bills_summary' => $bills_summary,
+                    'message' => count($charges) > 0 ? 'Charges loaded successfully' : 'No charges found for this patient'
+                ]);
+                
+            } catch (Exception $e) {
+                error_log("Patient discharge summary error: " . $e->getMessage());
+                send_json(['success' => false, 'error' => 'Database error: ' . $e->getMessage()], 500);
             }
 
-            // Get all charges for this patient
-            $charges_sql = "SELECT 
-                bi.*,
-                b.bill_type,
-                b.issued_date,
-                b.status
-            FROM bill_items bi
-            JOIN bills b ON bi.bill_id = b.id
-            WHERE b.patient_id = ?
-            ORDER BY b.issued_date DESC, bi.item_date DESC";
-
-            $charges_stmt = $conn->prepare($charges_sql);
-            $charges_stmt->bind_param('i', $patient_id);
-            $charges_stmt->execute();
-            $charges_result = $charges_stmt->get_result();
-
-            $charges = [];
-            while ($row = $charges_result->fetch_assoc()) {
-                $charges[] = $row;
+        case 'complete_patient_discharge':
+            require_method('POST');
+            $data = get_json_body();
+            $patient_id = intval($data['patient_id'] ?? 0);
+            $discharge_date = $data['discharge_date'] ?? date('Y-m-d');
+            $discharge_notes = $data['discharge_notes'] ?? '';
+            $unpaid_amount = floatval($data['unpaid_amount'] ?? 0);
+            
+            if ($patient_id <= 0) {
+                send_json(['success' => false, 'error' => 'Invalid patient ID'], 400);
             }
 
-            send_json([
-                'success' => true,
-                'patient_info' => $patient_info,
-                'charges' => $charges,
-                'total_charges' => count($charges),
-                'grand_total' => array_sum(array_column($charges, 'total_price'))
-            ]);
+            // Check for unpaid bills
+            if ($unpaid_amount > 0) {
+                send_json([
+                    'success' => false, 
+                    'error' => "Patient has unpaid bills totaling ৳" . number_format($unpaid_amount, 2) . ". Please collect payment before discharge.",
+                    'unpaid_amount' => $unpaid_amount,
+                    'requires_payment' => true
+                ], 400);
+            }
+
+            $conn->begin_transaction();
+            try {
+                // Get active cabin booking
+                $cabin_booking_sql = "SELECT cb.*, c.cabin_number, c.price as daily_rate 
+                                     FROM cabin_bookings cb 
+                                     JOIN cabins c ON cb.cabin_id = c.cabin_id 
+                                     WHERE cb.user_id = ? AND cb.status = 'booked'";
+                $cabin_stmt = $conn->prepare($cabin_booking_sql);
+                $cabin_stmt->bind_param('i', $patient_id);
+                $cabin_stmt->execute();
+                $cabin_booking = $cabin_stmt->get_result()->fetch_assoc();
+
+                // Calculate final cabin charges
+                $final_cabin_cost = 0;
+                if ($cabin_booking) {
+                    $days_stayed = max(1, DATEDIFF($discharge_date, $cabin_booking['check_in']));
+                    $final_cabin_cost = $days_stayed * $cabin_booking['daily_rate'];
+                }
+
+                // Get all pending medical charges
+                $pending_charges_sql = "SELECT SUM(bi.total_price) as total_medical 
+                                      FROM bill_items bi 
+                                      JOIN bills b ON bi.bill_id = b.id 
+                                      WHERE b.patient_id = ? AND b.status != 'paid'";
+                $charges_stmt = $conn->prepare($pending_charges_sql);
+                $charges_stmt->bind_param('i', $patient_id);
+                $charges_stmt->execute();
+                $medical_total = $charges_stmt->get_result()->fetch_assoc()['total_medical'] ?? 0;
+
+                $total_discharge_amount = $final_cabin_cost + $medical_total;
+
+                // Create final discharge bill
+                $bill_sql = "INSERT INTO bills (patient_id, amount, status, bill_type, issued_date, total_amount, balance_amount, created_by) 
+                           VALUES (?, ?, 'pending', 'final', ?, ?, ?, ?)";
+                $bill_stmt = $conn->prepare($bill_sql);
+                $created_by = $_SESSION['user_id'] ?? null;
+                $bill_stmt->bind_param('idssddi', $patient_id, $total_discharge_amount, $discharge_date, $total_discharge_amount, $total_discharge_amount, $created_by);
+                $bill_stmt->execute();
+                $final_bill_id = $conn->insert_id;
+
+                // Add cabin charges to bill items if applicable
+                if ($cabin_booking && $final_cabin_cost > 0) {
+                    $cabin_item_sql = "INSERT INTO bill_items (bill_id, item_type, item_name, item_description, quantity, unit_price, total_price, service_date) 
+                                      VALUES (?, 'room', 'Cabin Accommodation', ?, ?, ?, ?, ?)";
+                    $cabin_item_stmt = $conn->prepare($cabin_item_sql);
+                    $days_stayed = max(1, DATEDIFF($discharge_date, $cabin_booking['check_in']));
+                    $description = "Cabin #{$cabin_booking['cabin_number']} - {$days_stayed} days";
+                    $cabin_item_stmt->bind_param('issddss', $final_bill_id, $description, $days_stayed, $cabin_booking['daily_rate'], $final_cabin_cost, $cabin_booking['check_in']);
+                    $cabin_item_stmt->execute();
+                }
+
+                // Update cabin booking status
+                if ($cabin_booking) {
+                    $update_cabin_sql = "UPDATE cabin_bookings SET check_out = ?, status = 'completed' WHERE booking_id = ?";
+                    $update_cabin_stmt = $conn->prepare($update_cabin_sql);
+                    $update_cabin_stmt->bind_param('si', $discharge_date, $cabin_booking['booking_id']);
+                    $update_cabin_stmt->execute();
+
+                    // Update cabin availability
+                    $update_cabin_availability = $conn->prepare("UPDATE cabins SET availability = 1 WHERE cabin_id = ?");
+                    $update_cabin_availability->bind_param('i', $cabin_booking['cabin_id']);
+                    $update_cabin_availability->execute();
+                }
+
+                // Update patient ledger
+                $ledger_sql = "INSERT INTO patient_ledger (patient_id, transaction_type, amount, description, reference_id, reference_type, created_by) 
+                              VALUES (?, 'charge', ?, ?, ?, 'bill', ?)";
+                $ledger_stmt = $conn->prepare($ledger_sql);
+                $description = "Final discharge bill - Cabin: " . ($final_cabin_cost > 0 ? "৳" . number_format($final_cabin_cost, 2) : "N/A") . 
+                              ", Medical: ৳" . number_format($medical_total, 2);
+                $ledger_stmt->bind_param('idssi', $patient_id, $total_discharge_amount, $description, $final_bill_id, $created_by);
+                $ledger_stmt->execute();
+
+                $conn->commit();
+
+                send_json([
+                    'success' => true,
+                    'message' => 'Patient discharge completed successfully',
+                    'final_bill_id' => $final_bill_id,
+                    'total_amount' => $total_discharge_amount,
+                    'cabin_cost' => $final_cabin_cost,
+                    'medical_cost' => $medical_total,
+                    'discharge_date' => $discharge_date
+                ]);
+
+            } catch (Exception $e) {
+                $conn->rollback();
+                error_log("Complete discharge error: " . $e->getMessage());
+                send_json(['success' => false, 'error' => 'Failed to complete discharge: ' . $e->getMessage()], 500);
+            }
 
         case 'generate_discharge_bill':
             require_method('POST');
@@ -840,16 +1141,21 @@ try {
         case 'get_patients':
             require_method('GET');
             $search = $_GET['search'] ?? '';
+            $patient_id = intval($_GET['patient_id'] ?? 0);
             
             $where_conditions = ["role_id = 1"]; // Only patients
             $params = [];
             $types = '';
             
-            if ($search) {
-                $where_conditions[] = "(name LIKE ? OR phone LIKE ? OR email LIKE ?)";
+            if ($patient_id > 0) {
+                $where_conditions[] = "id = ?";
+                $params[] = $patient_id;
+                $types .= 'i';
+            } elseif ($search) {
+                $where_conditions[] = "(name LIKE ? OR phone LIKE ? OR email LIKE ? OR id LIKE ?)";
                 $search_param = "%$search%";
-                $params = array_merge($params, [$search_param, $search_param, $search_param]);
-                $types .= 'sss';
+                $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param]);
+                $types .= 'ssss';
             }
             
             $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
@@ -871,6 +1177,171 @@ try {
             send_json([
                 'success' => true,
                 'data' => $patients
+            ]);
+
+        case 'revenue_trend':
+            require_method('GET');
+            $period = $_GET['period'] ?? 'monthly'; // daily, weekly, monthly, yearly
+            $start_date = $_GET['start_date'] ?? date('Y-m-01');
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            
+            $date_format = match($period) {
+                'daily' => '%Y-%m-%d',
+                'weekly' => '%Y-%u',
+                'monthly' => '%Y-%m',
+                'yearly' => '%Y',
+                default => '%Y-%m'
+            };
+            
+            $sql = "SELECT 
+                        DATE_FORMAT(payment_date, ?) as period,
+                        SUM(payment_amount) as total_revenue,
+                        COUNT(*) as transaction_count
+                    FROM payments 
+                    WHERE payment_status = 'completed' 
+                    AND DATE(payment_date) BETWEEN ? AND ?
+                    GROUP BY DATE_FORMAT(payment_date, ?)
+                    ORDER BY period";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ssss', $date_format, $start_date, $end_date, $date_format);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $trend_data = [];
+            while ($row = $result->fetch_assoc()) {
+                $trend_data[] = $row;
+            }
+            
+            send_json([
+                'success' => true,
+                'data' => $trend_data,
+                'period' => $period,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
+
+        case 'service_revenue':
+            require_method('GET');
+            $start_date = $_GET['start_date'] ?? date('Y-m-01');
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            
+            $sql = "SELECT 
+                        bi.item_type,
+                        bi.item_name,
+                        COUNT(*) as service_count,
+                        SUM(bi.total_price) as total_revenue,
+                        AVG(bi.total_price) as avg_price
+                    FROM bill_items bi
+                    JOIN bills b ON bi.bill_id = b.id
+                    WHERE DATE(b.issued_date) BETWEEN ? AND ?
+                    GROUP BY bi.item_type, bi.item_name
+                    ORDER BY total_revenue DESC";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ss', $start_date, $end_date);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $service_data = [];
+            while ($row = $result->fetch_assoc()) {
+                $service_data[] = $row;
+            }
+            
+            send_json([
+                'success' => true,
+                'data' => $service_data,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
+
+        case 'payment_method_analysis':
+            require_method('GET');
+            $start_date = $_GET['start_date'] ?? date('Y-m-01');
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            
+            $sql = "SELECT 
+                        payment_method,
+                        COUNT(*) as transaction_count,
+                        SUM(payment_amount) as total_amount,
+                        AVG(payment_amount) as avg_amount
+                    FROM payments 
+                    WHERE payment_status = 'completed' 
+                    AND DATE(payment_date) BETWEEN ? AND ?
+                    GROUP BY payment_method
+                    ORDER BY total_amount DESC";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ss', $start_date, $end_date);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $payment_data = [];
+            $total_amount = 0;
+            while ($row = $result->fetch_assoc()) {
+                $payment_data[] = $row;
+                $total_amount += $row['total_amount'];
+            }
+            
+            // Add percentage calculation
+            foreach ($payment_data as &$item) {
+                $item['percentage'] = $total_amount > 0 ? round(($item['total_amount'] / $total_amount) * 100, 2) : 0;
+            }
+            
+            send_json([
+                'success' => true,
+                'data' => $payment_data,
+                'total_amount' => $total_amount,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
+
+        case 'financial_summary':
+            require_method('GET');
+            $start_date = $_GET['start_date'] ?? date('Y-m-01');
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            
+            // Total Revenue
+            $revenue_sql = "SELECT SUM(payment_amount) as total_revenue FROM payments WHERE payment_status = 'completed' AND DATE(payment_date) BETWEEN ? AND ?";
+            $revenue_stmt = $conn->prepare($revenue_sql);
+            $revenue_stmt->bind_param('ss', $start_date, $end_date);
+            $revenue_stmt->execute();
+            $total_revenue = $revenue_stmt->get_result()->fetch_assoc()['total_revenue'] ?? 0;
+            
+            // Total Bills
+            $bills_sql = "SELECT COUNT(*) as total_bills, SUM(total_amount) as total_billed FROM bills WHERE DATE(issued_date) BETWEEN ? AND ?";
+            $bills_stmt = $conn->prepare($bills_sql);
+            $bills_stmt->bind_param('ss', $start_date, $end_date);
+            $bills_stmt->execute();
+            $bills_result = $bills_stmt->get_result()->fetch_assoc();
+            
+            // Outstanding Amount
+            $outstanding_sql = "SELECT SUM(balance_amount) as total_outstanding FROM bills WHERE balance_amount > 0";
+            $outstanding_stmt = $conn->query($outstanding_sql);
+            $total_outstanding = $outstanding_stmt->fetch_assoc()['total_outstanding'] ?? 0;
+            
+            // Average Bill Amount
+            $avg_bill_sql = "SELECT AVG(total_amount) as avg_bill FROM bills WHERE DATE(issued_date) BETWEEN ? AND ?";
+            $avg_bill_stmt = $conn->prepare($avg_bill_sql);
+            $avg_bill_stmt->bind_param('ss', $start_date, $end_date);
+            $avg_bill_stmt->execute();
+            $avg_bill = $avg_bill_stmt->get_result()->fetch_assoc()['avg_bill'] ?? 0;
+            
+            // Collection Rate
+            $collection_rate = $bills_result['total_billed'] > 0 ? round(($total_revenue / $bills_result['total_billed']) * 100, 2) : 0;
+            
+            send_json([
+                'success' => true,
+                'data' => [
+                    'total_revenue' => floatval($total_revenue),
+                    'total_bills' => intval($bills_result['total_bills'] ?? 0),
+                    'total_billed' => floatval($bills_result['total_billed'] ?? 0),
+                    'total_outstanding' => floatval($total_outstanding),
+                    'avg_bill_amount' => floatval($avg_bill),
+                    'collection_rate' => floatval($collection_rate)
+                ],
+                'start_date' => $start_date,
+                'end_date' => $end_date
             ]);
 
         default:
