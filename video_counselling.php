@@ -157,6 +157,47 @@ window.onload = function () {
     }
 }
 
+function sendCode() {
+    const params = (function(url){
+        let urlStr = url.split('?')[1];
+        const urlSearchParams = new URLSearchParams(urlStr);
+        return Object.fromEntries(urlSearchParams.entries());
+    })(window.location.href);
+
+    const patientId = params['patient_id'];
+    const meetingCode = document.getElementById('manualRoomID') ? document.getElementById('manualRoomID').value.trim() : '';
+
+    if (!patientId) {
+        alert('Patient ID missing in URL. Cannot send code.');
+        return;
+    }
+    if (!meetingCode) {
+        alert('Please provide a meeting code to send.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('patient_id', patientId);
+    formData.append('meeting_code', meetingCode);
+
+    fetch('save_meeting_code.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.success) {
+            alert('Meeting code sent successfully!');
+        } else {
+            alert('Failed to send meeting code: ' + (data && data.message ? data.message : 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Network error while sending meeting code.');
+    });
+}
+
 </script>
 
 </html>
