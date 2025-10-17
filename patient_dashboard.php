@@ -365,6 +365,54 @@ if (isset($_SESSION['user_id'])) {
                 transform: translateY(0);
             }
         }
+
+        /* Analysis Popup Styles */
+        #analysis-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #191b2e;
+            padding: 25px;
+            border-radius: 15px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #7f5fff;
+        }
+
+        #analysis-popup h3 {
+            margin: 0;
+            color: #fff;
+        }
+
+        #analysis-popup button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #analysis-content {
+            white-space: pre-line;
+            color: #d0d0d0;
+            font-family: monospace;
+        }
+
+        #analysis-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
     </style>
 </head>
 
@@ -513,10 +561,19 @@ if (isset($_SESSION['user_id'])) {
                         <?php else: ?>
                             <?php foreach ($reports as $rep): ?>
                                 <tr>
-                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['test_name']); ?></td>
-                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['report_date']); ?></td>
-                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><?php echo htmlspecialchars($rep['uploaded_at']); ?></td>
-                                    <td style="padding:10px; border-bottom:1px solid #23244a; "><a style="color:#7f5fff; text-decoration:underline;" href="<?php echo htmlspecialchars($rep['report_file']); ?>" target="_blank" rel="noopener noreferrer">View</a></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a;"><?php echo htmlspecialchars($rep['test_name']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a;"><?php echo htmlspecialchars($rep['report_date']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a;"><?php echo htmlspecialchars($rep['uploaded_at']); ?></td>
+                                    <td style="padding:10px; border-bottom:1px solid #23244a;">
+                                        <div style="display: flex; gap: 15px;">
+                                            <a style="color:#7f5fff; text-decoration:underline;"
+                                                href="<?php echo htmlspecialchars($rep['report_file']); ?>"
+                                                target="_blank"
+                                                rel="noopener noreferrer">View</a>
+                                            <a style="color:#00ffb0; text-decoration:underline; cursor:pointer;"
+                                                onclick="analyzeReport(<?php echo $rep['id']; ?>)">Analysis</a>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -536,33 +593,25 @@ if (isset($_SESSION['user_id'])) {
                 <button type="submit" class="popup-join-btn">Join Meeting</button>
             </form>
         </div>
-        <!-- <div id="popup-backdrop" class="popup-backdrop"></div>
-        <script>
-            // Show popup on connect button click
-            document.querySelectorAll('.connect-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.getElementById('meeting-popup').classList.add('show');
-                    document.getElementById('popup-backdrop').classList.add('show');
-                });
-            });
-
-            function closePopup() {
-                document.getElementById('meeting-popup').classList.remove('show');
-                document.getElementById('popup-backdrop').classList.remove('show');
-            }
-            // Optional: close popup on backdrop click
-            document.getElementById('popup-backdrop').onclick = closePopup;
-            // Prevent form submit (demo only)
-            document.querySelector('.popup-form').onsubmit = function(e) {
-                e.preventDefault();
-            };
-        </script> -->
     </div>
     </div>
 
     <!-- Add this before </body> -->
     <div id="notification-backdrop" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; z-index: 1000;" onclick="toggleNotifications()"></div>
+
+    <!-- Analysis Popup -->
+    <div id="analysis-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
+        background:#191b2e; padding:25px; border-radius:15px; z-index:1000; width:80%; max-width:600px; 
+        max-height:80vh; overflow-y:auto; border:2px solid #7f5fff">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h3 style="margin:0; color:#fff">Report Analysis</h3>
+            <button onclick="closeAnalysisPopup()" style="background:none; border:none; color:#fff; 
+                font-size:24px; cursor:pointer">&times;</button>
+        </div>
+        <div id="analysis-content" style="white-space:pre-line; color:#d0d0d0; font-family:monospace"></div>
+    </div>
+    <div id="analysis-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; 
+        background:rgba(0,0,0,0.5); z-index:999"></div>
 
     <script>
         function toggleNotifications() {
@@ -583,6 +632,36 @@ if (isset($_SESSION['user_id'])) {
             // For now, it will redirect to join_meeting.php with appointment ID
             window.location.href = 'join_meeting.php?appointment_id=' + appointmentId;
         }
+
+        function analyzeReport(reportId) {
+            // Show loading in popup
+            document.getElementById('analysis-popup').style.display = 'block';
+            document.getElementById('analysis-backdrop').style.display = 'block';
+            document.getElementById('analysis-content').innerHTML = 'Analyzing report...';
+
+            // Fetch analysis results
+            fetch(`analyze_report.php?report_id=${reportId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('analysis-content').innerHTML = data.text;
+                    } else {
+                        document.getElementById('analysis-content').innerHTML = 'Error: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('analysis-content').innerHTML = 'Error analyzing report';
+                    console.error('Error:', error);
+                });
+        }
+
+        function closeAnalysisPopup() {
+            document.getElementById('analysis-popup').style.display = 'none';
+            document.getElementById('analysis-backdrop').style.display = 'none';
+        }
+
+        // Close popup when clicking backdrop
+        document.getElementById('analysis-backdrop').onclick = closeAnalysisPopup;
     </script>
 </body>
 
