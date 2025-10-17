@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 15, 2025 at 08:58 PM
+-- Generation Time: Oct 17, 2025 at 02:52 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -74,7 +74,8 @@ INSERT INTO `ai_conversations` (`id`, `user_id`, `title`, `created_at`, `updated
 (10, 14, 'New Chat', '2025-06-16 19:08:49', '2025-06-16 19:08:49'),
 (11, 14, 'New Chat', '2025-06-16 19:08:50', '2025-06-16 19:08:50'),
 (12, 14, 'I have a backpain. Help me.', '2025-06-25 07:06:47', '2025-06-25 07:06:47'),
-(13, 16, 'Hey. Give me the code of adding...', '2025-06-30 04:30:13', '2025-06-30 04:33:49');
+(13, 16, 'Hey. Give me the code of adding...', '2025-06-30 04:30:13', '2025-06-30 04:33:49'),
+(14, 14, 'hey there', '2025-10-15 20:24:32', '2025-10-15 20:26:10');
 
 -- --------------------------------------------------------
 
@@ -104,7 +105,10 @@ CREATE TABLE `appointments` (
 INSERT INTO `appointments` (`id`, `patient_id`, `patient_name`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`, `hospital_id`, `appointment_status`, `created_at`) VALUES
 (1, 14, NULL, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL, NULL, 'pending', '2025-10-15 16:59:29'),
 (5, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:51:38'),
-(6, 14, 'Samad Ali', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:52:24');
+(6, 14, 'Samad Ali', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:52:24'),
+(7, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 19:44:15'),
+(8, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'pending', '2025-10-16 19:36:28'),
+(9, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'pending', '2025-10-16 19:48:01');
 
 -- --------------------------------------------------------
 
@@ -164,7 +168,8 @@ CREATE TABLE `bills` (
 --
 
 INSERT INTO `bills` (`id`, `patient_id`, `amount`, `status`, `issued_date`, `bill_type`, `due_date`, `discount_amount`, `tax_amount`, `total_amount`, `paid_amount`, `balance_amount`, `insurance_claim_id`, `corporate_client_id`, `created_by`, `updated_by`, `updated_at`) VALUES
-(1, 16, 3000.00, 'paid', NULL, 'final', NULL, 600.00, 0.00, 2400.00, 2400.00, 0.00, '0', 0, 7, 7, '2025-10-15 17:13:26');
+(1, 16, 3000.00, 'paid', NULL, 'final', NULL, 600.00, 0.00, 2400.00, 2400.00, 0.00, '0', 0, 7, 7, '2025-10-15 17:13:26'),
+(2, 14, 450.00, '', NULL, 'final', NULL, 90.00, 0.00, 360.00, 0.00, 360.00, '0', 0, 7, NULL, '2025-10-15 20:34:39');
 
 -- --------------------------------------------------------
 
@@ -195,7 +200,9 @@ CREATE TABLE `bill_items` (
 INSERT INTO `bill_items` (`id`, `bill_id`, `item_type`, `item_name`, `item_description`, `quantity`, `unit_price`, `total_price`, `discount_percentage`, `discount_amount`, `final_price`, `service_date`, `created_at`) VALUES
 (1, 1, 'nursing', 'Nursing Care', 'Nursing Care - Nursing', 1, 500.00, 500.00, 0.00, 0.00, 500.00, NULL, '2025-10-15 17:13:12'),
 (2, 1, 'room', 'General Ward Bed', 'General Ward Bed - General Ward', 1, 2000.00, 2000.00, 0.00, 0.00, 2000.00, NULL, '2025-10-15 17:13:12'),
-(3, 1, 'nursing', 'Nursing Care', 'Nursing Care - Nursing', 1, 500.00, 500.00, 0.00, 0.00, 500.00, NULL, '2025-10-15 17:13:12');
+(3, 1, 'nursing', 'Nursing Care', 'Nursing Care - Nursing', 1, 500.00, 500.00, 0.00, 0.00, 500.00, NULL, '2025-10-15 17:13:12'),
+(4, 2, 'test', 'MRI', 'MRI - Radiology', 1, 50.00, 50.00, 0.00, 0.00, 50.00, NULL, '2025-10-15 20:34:39'),
+(5, 2, 'test', 'X-Ray Chest', 'X-Ray Chest - Radiology', 1, 400.00, 400.00, 0.00, 0.00, 400.00, NULL, '2025-10-15 20:34:39');
 
 -- --------------------------------------------------------
 
@@ -300,7 +307,9 @@ INSERT INTO `chatbot_queries` (`id`, `user_id`, `conversation_id`, `message`, `r
 (10, 14, 8, 'hey how can you assist me ?', 'Hello! How can I assist you today? Whether you need medical advice or mental health support, I\'m here to help. Please feel free to share your concerns.', '2025-05-10 06:29:36'),
 (11, 14, 12, 'I have a backpain. Help me.', 'I\'m sorry to hear about your back pain. While I can\'t provide medical advice, here are some general suggestions that might help:\r\n\r\n1. **Rest**: Avoid strenuous activities that may worsen the pain, but try to stay moderately active to prevent stiffness.  \r\n2. **Posture**: Ensure proper posture while sitting, standing, or lifting objects.  \r\n3. **Heat/Cold Therapy**: Apply a warm compress or ice pack to the affected area for short periods.  \r\n4. **Gentle Stretching**: Try mild stretches or yoga (avoid overexertion).  \r\n5. **Over-the-Counter Pain Relief**: Medications like ibuprofen or acetaminophen *may* help, but consult a pharmacist or doctor first.  \r\n\r\n**Important**: If the pain is severe, persistent, accompanied by numbness/tingling, or after an injury, **seek immediate medical care**. A healthcare professional can diagnose the cause and recommend treatment.  \r\n\r\nTake care and prioritize seeing a doctor for personalized guidance!', '2025-06-25 07:06:47'),
 (12, 16, 13, 'Hey. Give me the code of adding two numbers.', 'Hi there! 👋 I\'m here to help with Mental health support, and Physical health-related questions only. If you have other queries, please consult a medical expert or explore other features of MediAI. Thanks for understanding! 💙', '2025-06-30 04:30:13'),
-(13, 16, 13, 'I have a backpain. Give me some suggestions so that I can get rid of it.', 'I\'m sorry to hear about your back pain. Here are some **general suggestions** to help alleviate discomfort, but if the pain is severe, persistent, or accompanied by other symptoms (e.g., numbness, fever, or loss of bladder/bowel control), consult a healthcare provider immediately:\r\n\r\n---\r\n\r\n### 1. **Gentle Movement**  \r\n   - Avoid prolonged bed rest; light activity (e.g., walking) can reduce stiffness.  \r\n   - Try gentle stretches like **cat-cow pose** or **child’s pose** to ease tension.  \r\n\r\n### 2. **Heat or Cold Therapy**  \r\n   - Apply an **ice pack** (for acute pain/swelling) or a **heating pad** (for muscle stiffness) for 15-20 minutes.  \r\n\r\n### 3. **Posture Adjustments**  \r\n   - Avoid slouching. Use a chair with lumbar support if sitting for long periods.  \r\n   - Adjust your workstation to align your spine neutrally.  \r\n\r\n### 4. **Over-the-Counter Relief**  \r\n   - Pain relievers like **ibuprofen** or **acetaminophen** (if approved by your doctor) may help reduce inflammation.  \r\n\r\n### 5. **Strengthen Core Muscles**  \r\n   - Engage in low-impact exercises like **pilates** or **bridges** to support your spine.  \r\n\r\n### 6. **Avoid Heavy Lifting**  \r\n   - If lifting is necessary, bend at the knees (not waist) and hold objects close to your body.  \r\n\r\n### 7. **Mattress Check**  \r\n   - Ensure your mattress supports proper spinal alignment. A medium-firm mattress is often recommended.  \r\n\r\n### 8. **Stress Management**  \r\n   - Stress can worsen muscle tension. Practice relaxation techniques like deep breathing or meditation.  \r\n\r\n---\r\n\r\n**When to see a doctor:**  \r\n- Pain lasts >2 weeks.  \r\n- Radiates to legs or arms.  \r\n- Follows an injury or accident.  \r\n\r\nFeel better soon! 💙 Always consult a medical expert for personalized advice.', '2025-06-30 04:33:49');
+(13, 16, 13, 'I have a backpain. Give me some suggestions so that I can get rid of it.', 'I\'m sorry to hear about your back pain. Here are some **general suggestions** to help alleviate discomfort, but if the pain is severe, persistent, or accompanied by other symptoms (e.g., numbness, fever, or loss of bladder/bowel control), consult a healthcare provider immediately:\r\n\r\n---\r\n\r\n### 1. **Gentle Movement**  \r\n   - Avoid prolonged bed rest; light activity (e.g., walking) can reduce stiffness.  \r\n   - Try gentle stretches like **cat-cow pose** or **child’s pose** to ease tension.  \r\n\r\n### 2. **Heat or Cold Therapy**  \r\n   - Apply an **ice pack** (for acute pain/swelling) or a **heating pad** (for muscle stiffness) for 15-20 minutes.  \r\n\r\n### 3. **Posture Adjustments**  \r\n   - Avoid slouching. Use a chair with lumbar support if sitting for long periods.  \r\n   - Adjust your workstation to align your spine neutrally.  \r\n\r\n### 4. **Over-the-Counter Relief**  \r\n   - Pain relievers like **ibuprofen** or **acetaminophen** (if approved by your doctor) may help reduce inflammation.  \r\n\r\n### 5. **Strengthen Core Muscles**  \r\n   - Engage in low-impact exercises like **pilates** or **bridges** to support your spine.  \r\n\r\n### 6. **Avoid Heavy Lifting**  \r\n   - If lifting is necessary, bend at the knees (not waist) and hold objects close to your body.  \r\n\r\n### 7. **Mattress Check**  \r\n   - Ensure your mattress supports proper spinal alignment. A medium-firm mattress is often recommended.  \r\n\r\n### 8. **Stress Management**  \r\n   - Stress can worsen muscle tension. Practice relaxation techniques like deep breathing or meditation.  \r\n\r\n---\r\n\r\n**When to see a doctor:**  \r\n- Pain lasts >2 weeks.  \r\n- Radiates to legs or arms.  \r\n- Follows an injury or accident.  \r\n\r\nFeel better soon! 💙 Always consult a medical expert for personalized advice.', '2025-06-30 04:33:49'),
+(14, 14, 14, 'hey there', 'No response received.', '2025-10-15 20:24:32'),
+(15, 14, 14, 'hey', 'No response received.', '2025-10-15 20:26:10');
 
 -- --------------------------------------------------------
 
@@ -758,6 +767,7 @@ INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uplo
 (1, 16, 'blood count', 'uploads/reports/Assignment_3__1__pid16_20251008205617.pdf', 7, '2025-10-08 18:56:17', '2025-10-08'),
 (2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
 (3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
+
 -- --------------------------------------------------------
 
 --
@@ -852,6 +862,77 @@ INSERT INTO `medication_times` (`id`, `medication_id`, `dose_time`) VALUES
 (6, 7, '21:52:00'),
 (7, 8, '13:23:00'),
 (8, 9, '13:12:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `medicine_suggestions`
+--
+
+CREATE TABLE `medicine_suggestions` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `disease_name` varchar(150) NOT NULL,
+  `medicine_name` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `effectiveness_score` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `company_name` varchar(150) DEFAULT NULL,
+  `verified_by` varchar(150) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `medicine_suggestions`
+--
+
+INSERT INTO `medicine_suggestions` (`id`, `disease_name`, `medicine_name`, `description`, `effectiveness_score`, `company_name`, `verified_by`, `created_at`) VALUES
+(1, 'Fever', 'Paracetamol 500mg', 'Reduces fever and relieves mild to moderate pain', 92.50, 'Generic', 'Dr. X', '2025-10-17 12:24:54'),
+(2, 'Fever', 'Napa Extend', 'Extended-release paracetamol for sustained relief', 88.00, 'Beximco', 'Dr. Y', '2025-10-17 12:24:54'),
+(3, 'Headache', 'Ace Plus', 'Paracetamol with caffeine for tension headaches', 85.00, 'Square', 'Dr. Nurul Huda', '2025-10-17 12:24:54'),
+(4, 'Fever', 'Ibuprofen 200 mg', 'NSAID; reduces fever and inflammatory pain (with food)', 84.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(5, 'Headache', 'Paracetamol 500 mg', 'Analgesic; effective in mild to moderate tension headaches', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(6, 'Headache', 'Ibuprofen 200 mg', 'NSAID; useful where inflammation suspected', 85.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(7, 'Migraine', 'Sumatriptan 50 mg', 'Triptan; abortive therapy for moderate–severe migraine', 88.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(8, 'Migraine', 'Naproxen 500 mg', 'NSAID; acute migraine pain relief', 82.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(9, 'Migraine', 'Rizatriptan 10 mg', 'Triptan; fast onset for acute migraine', 89.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(10, 'Sore Throat', 'Benzydamine Gargle', 'Topical anti-inflammatory for throat pain', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(11, 'Sore Throat', 'Paracetamol 500 mg', 'Analgesic; symptomatic relief', 88.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(12, 'Sore Throat', 'Lozenges (Amylmetacresol + Dichlorobenzyl alcohol)', 'Antiseptic lozenge to soothe throat', 80.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(13, 'Common Cold', 'Cetirizine 10 mg', 'Antihistamine; reduces sneezing and rhinorrhea', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(14, 'Common Cold', 'Paracetamol 500 mg', 'For fever/body aches due to cold', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(15, 'Common Cold', 'Pseudoephedrine 60 mg', 'Decongestant; short-term relief of nasal congestion', 76.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(16, 'Dry Cough', 'Dextromethorphan 15 mg', 'Antitussive for non-productive cough', 80.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(17, 'Dry Cough', 'Levocloperastine 20 mg', 'Antitussive; reduces cough reflex', 77.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(18, 'Dry Cough', 'Honey + Lemon Syrup', 'Demulcent; symptomatic soothing', 70.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(19, 'Productive Cough', 'Guaifenesin 200 mg', 'Expectorant; increases mucus clearance', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(20, 'Productive Cough', 'Ambroxol 30 mg', 'Mucolytic; thins bronchial secretions', 80.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(21, 'Productive Cough', 'Bromhexine 8 mg', 'Mucolytic; helps expectoration', 76.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(22, 'Dyspepsia', 'Domperidone 10 mg', 'Prokinetic; improves gastric emptying (short-term)', 73.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(23, 'Dyspepsia', 'Pantoprazole 40 mg', 'PPI; reduces acid-related dyspepsia', 89.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(24, 'Dyspepsia', 'Antacid (Aluminum/Magnesium Hydroxide)', 'Rapid symptomatic relief of acidity', 72.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(25, 'Diarrhea', 'Oral Rehydration Salts (ORS)', 'Gold standard for rehydration; essential therapy', 95.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(26, 'Diarrhea', 'Loperamide 2 mg', 'Reduces stool frequency (avoid in bloody diarrhea/fever)', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(27, 'Diarrhea', 'Zinc 20 mg', 'Adjunct; reduces duration in acute diarrhea', 74.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(28, 'Allergic Rhinitis', 'Cetirizine 10 mg', 'Second-gen antihistamine; non-sedating', 84.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(29, 'Allergic Rhinitis', 'Loratadine 10 mg', 'Second-gen antihistamine; 24h relief', 82.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(30, 'Allergic Rhinitis', 'Fluticasone Nasal Spray', 'Intranasal steroid; reduces nasal inflammation', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(31, 'Asthma', 'Salbutamol Inhaler 100 mcg', 'SABA; rescue reliever for bronchospasm', 92.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(32, 'Asthma', 'Budesonide Inhaler', 'ICS; controller for persistent asthma', 88.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(33, 'Asthma', 'Formoterol + Budesonide Inhaler', 'LABA + ICS; maintenance therapy', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(34, 'Hypertension', 'Amlodipine 5 mg', 'DHP-CCB; effective BP lowering once daily', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(35, 'Hypertension', 'Losartan 50 mg', 'ARB; BP control and renal protection', 88.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(36, 'Hypertension', 'Hydrochlorothiazide 12.5 mg', 'Thiazide diuretic; add-on or first-line', 82.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(37, 'Type 2 Diabetes', 'Metformin 500 mg', 'Biguanide; first-line for glycemic control (with meals)', 92.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(38, 'Type 2 Diabetes', 'Metformin XR 750 mg', 'Extended-release; improves GI tolerability', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(39, 'Type 2 Diabetes', 'Sitagliptin 100 mg', 'DPP-4 inhibitor; add-on to metformin', 82.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(40, 'Dyslipidemia', 'Atorvastatin 20 mg', 'Statin; reduces LDL and CV risk', 90.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(41, 'Dyslipidemia', 'Rosuvastatin 10 mg', 'Potent statin; robust LDL reduction', 91.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(42, 'Dyslipidemia', 'Fenofibrate 160 mg', 'Fibrate; lowers triglycerides', 80.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(43, 'Back Pain', 'Ibuprofen 400 mg', 'NSAID; short-term anti-inflammatory relief', 84.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(44, 'Back Pain', 'Naproxen 500 mg', 'NSAID; longer half-life analgesia', 85.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(45, 'Back Pain', 'Paracetamol 500 mg', 'Analgesic; adjunct/alternative', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(46, 'Acne', 'Benzoyl Peroxide 2.5–5% Gel', 'Antibacterial/comedolytic; first-line topical', 88.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(47, 'Acne', 'Adapalene 0.1% Gel', 'Topical retinoid; comedolytic and anti-inflammatory', 86.00, 'Generic', 'Admin', '2025-10-17 12:43:47'),
+(48, 'Acne', 'Clindamycin 1% Gel', 'Topical antibiotic; combine with benzoyl peroxide', 78.00, 'Generic', 'Admin', '2025-10-17 12:43:47');
 
 -- --------------------------------------------------------
 
@@ -972,7 +1053,8 @@ CREATE TABLE `patient_ledger` (
 
 INSERT INTO `patient_ledger` (`id`, `patient_id`, `transaction_type`, `amount`, `description`, `reference_id`, `reference_type`, `created_at`, `created_by`) VALUES
 (1, 16, 'charge', 2400.00, 'Bill created', 1, 'bill', '2025-10-15 17:13:12', 7),
-(2, 16, 'payment', 2400.00, 'Payment received', 1, 'payment', '2025-10-15 17:13:26', 7);
+(2, 16, 'payment', 2400.00, 'Payment received', 1, 'payment', '2025-10-15 17:13:26', 7),
+(3, 14, 'charge', 360.00, 'Bill created', 2, 'bill', '2025-10-15 20:34:39', 7);
 
 -- --------------------------------------------------------
 
@@ -1616,6 +1698,14 @@ ALTER TABLE `medication_times`
   ADD KEY `medication_id` (`medication_id`);
 
 --
+-- Indexes for table `medicine_suggestions`
+--
+ALTER TABLE `medicine_suggestions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_disease_name` (`disease_name`),
+  ADD KEY `idx_effectiveness` (`effectiveness_score`);
+
+--
 -- Indexes for table `meeting_code`
 --
 ALTER TABLE `meeting_code`
@@ -1786,13 +1876,13 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `ai_conversations`
 --
 ALTER TABLE `ai_conversations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `available_hours`
@@ -1804,13 +1894,13 @@ ALTER TABLE `available_hours`
 -- AUTO_INCREMENT for table `bills`
 --
 ALTER TABLE `bills`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `bill_items`
 --
 ALTER TABLE `bill_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `cabins`
@@ -1834,7 +1924,7 @@ ALTER TABLE `cabin_bookings_legacy`
 -- AUTO_INCREMENT for table `chatbot_queries`
 --
 ALTER TABLE `chatbot_queries`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `comments`
@@ -1957,6 +2047,12 @@ ALTER TABLE `medication_times`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `medicine_suggestions`
+--
+ALTER TABLE `medicine_suggestions`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+
+--
 -- AUTO_INCREMENT for table `meeting_code`
 --
 ALTER TABLE `meeting_code`
@@ -1978,7 +2074,7 @@ ALTER TABLE `package_items`
 -- AUTO_INCREMENT for table `patient_ledger`
 --
 ALTER TABLE `patient_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `payments`
