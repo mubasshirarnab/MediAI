@@ -118,6 +118,7 @@
       const [formData, setFormData] = useState({
         patient_id: '',
         bill_type: 'final',
+        issued_date: new Date().toISOString().split('T')[0], // Set current date as default
         items: [],
         discount_id: '',
         insurance_id: '',
@@ -218,6 +219,17 @@
                   React.createElement('option', { key: 'interim', value: 'interim' }, 'Interim Bill'),
                   React.createElement('option', { key: 'advance', value: 'advance' }, 'Advance Bill')
                 ])
+              ]),
+              
+              React.createElement('div', { key: 'issued-date', className: 'form-group' }, [
+                React.createElement('label', { key: 'label' }, 'Issue Date'),
+                React.createElement('input', {
+                  key: 'input',
+                  type: 'date',
+                  value: formData.issued_date,
+                  onChange: (e) => setFormData(prev => ({ ...prev, issued_date: e.target.value })),
+                  style: { colorScheme: 'dark' }
+                })
               ])
             ]),
             
