@@ -154,6 +154,7 @@ if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
     <a href="doctors.php" class="navbar-link" target="_top">Appointment</a>
     <a href="feed.php" class="navbar-link" target="_top">Community</a>
     <a href="mediReminder.php" class="navbar-link" target="_top">Medication Reminder</a>
+    <a href="medicine_suggestion.php" class="navbar-link" target="_top">Medicine Suggestion</a>
     <?php
     // Role-aware pages
     $role = $_SESSION['role'] ?? null; // 'patient' | 'doctor' | 'hospital'
