@@ -443,7 +443,7 @@
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.8)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -455,76 +455,239 @@
           key: 'modal-content',
           className: 'modal-content',
           style: {
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            maxWidth: '700px',
+            backgroundColor: '#fff',
+            borderRadius: '20px',
+            maxWidth: '600px',
             width: '90%',
-            maxHeight: '80vh',
-            overflow: 'auto'
+            maxHeight: '85vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            position: 'relative'
           },
           onClick: (e) => e.stopPropagation()
         }, [
-          React.createElement('div', { key: 'modal-header', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } }, [
-            React.createElement('h3', { key: 'title' }, 'Doctor Details'),
-            React.createElement('button', { key: 'close', onClick: onClose, style: { background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' } }, '×')
+          // Header with close button
+          React.createElement('div', { 
+            key: 'modal-header', 
+            style: { 
+              background: 'linear-gradient(135deg, #a259ff 0%, #8a4ae6 100%)',
+              color: '#fff',
+              padding: '20px 30px',
+              borderRadius: '20px 20px 0 0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            } 
+          }, [
+            React.createElement('h3', { 
+              key: 'title', 
+              style: { margin: 0, fontSize: '1.5rem', fontWeight: '600' } 
+            }, 'Doctor Profile'),
+            React.createElement('button', { 
+              key: 'close', 
+              onClick: onClose, 
+              style: { 
+                background: 'rgba(255,255,255,0.2)', 
+                border: 'none', 
+                borderRadius: '50%',
+                width: '35px',
+                height: '35px',
+                fontSize: '18px', 
+                cursor: 'pointer',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              } 
+            }, '×')
           ]),
           
-          React.createElement('div', { key: 'doctor-info' }, [
-            React.createElement('div', { key: 'row-1', className: 'row', style: { marginBottom: '15px' } }, [
-              React.createElement('div', { key: 'col-1', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Doctor ID: '),
-                React.createElement('span', { key: 'value' }, doctor.user_id)
+          // Content
+          React.createElement('div', { 
+            key: 'modal-body', 
+            style: { padding: '30px' } 
+          }, [
+            // Doctor Photo and Basic Info
+            React.createElement('div', { 
+              key: 'profile-section', 
+              style: { 
+                textAlign: 'center', 
+                marginBottom: '30px',
+                paddingBottom: '25px',
+                borderBottom: '2px solid #f0f0f0'
+              } 
+            }, [
+              React.createElement('div', {
+                key: 'photo-container',
+                style: {
+                  position: 'relative',
+                  display: 'inline-block',
+                  marginBottom: '15px'
+                }
+              }, [
+                React.createElement('img', {
+                  key: 'doctor-photo',
+                  src: doctor.photo && doctor.photo !== 'default.jpg' ? `../uploads/doctors/${doctor.photo}` : '../img/portrait-medical-doctor-posing-office-16974063-1902546574.jpg',
+                  alt: doctor.doctor_name,
+                  style: {
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '4px solid #a259ff',
+                    boxShadow: '0 8px 25px rgba(162, 89, 255, 0.3)'
+                  },
+                  onError: (e) => {
+                    e.target.src = '../img/portrait-medical-doctor-posing-office-16974063-1902546574.jpg';
+                  }
+                }),
+                React.createElement('div', {
+                  key: 'status-indicator',
+                  style: {
+                    position: 'absolute',
+                    bottom: '5px',
+                    right: '5px',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: doctor.is_blocked == 1 ? '#ff4757' : '#2ed573',
+                    border: '3px solid #fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                  }
+                })
               ]),
-              React.createElement('div', { key: 'col-2', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Name: '),
-                React.createElement('span', { key: 'value' }, doctor.doctor_name)
+              React.createElement('h2', { 
+                key: 'doctor-name', 
+                style: { 
+                  margin: '0 0 5px 0', 
+                  color: '#333',
+                  fontSize: '1.8rem',
+                  fontWeight: '600'
+                } 
+              }, doctor.doctor_name),
+              React.createElement('p', { 
+                key: 'specialization', 
+                style: { 
+                  margin: '0 0 10px 0', 
+                  color: '#a259ff',
+                  fontSize: '1.1rem',
+                  fontWeight: '500'
+                } 
+              }, doctor.specialization),
+              React.createElement('div', {
+                key: 'status-badges',
+                style: { display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }
+              }, [
+                React.createElement('span', {
+                  key: 'availability-badge',
+                  style: {
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    backgroundColor: doctor.available == 1 ? '#e8f5e8' : '#ffe8e8',
+                    color: doctor.available == 1 ? '#2ed573' : '#ff4757',
+                    border: `1px solid ${doctor.available == 1 ? '#2ed573' : '#ff4757'}`
+                  }
+                }, doctor.available == 1 ? '✓ Available' : '✗ Unavailable'),
+                React.createElement('span', {
+                  key: 'verification-badge',
+                  style: {
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    backgroundColor: doctor.is_verified === 'authorized' ? '#e8f5e8' : '#fff3cd',
+                    color: doctor.is_verified === 'authorized' ? '#2ed573' : '#ffa502',
+                    border: `1px solid ${doctor.is_verified === 'authorized' ? '#2ed573' : '#ffa502'}`
+                  }
+                }, doctor.is_verified === 'authorized' ? '✓ Verified' : '⚠ Pending')
               ])
             ]),
             
-            React.createElement('div', { key: 'row-2', className: 'row', style: { marginBottom: '15px' } }, [
-              React.createElement('div', { key: 'col-1', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Email: '),
-                React.createElement('span', { key: 'value' }, doctor.email)
+            // Detailed Information Grid
+            React.createElement('div', { 
+              key: 'info-grid', 
+              style: { 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '20px'
+              } 
+            }, [
+              // Contact Information Card
+              React.createElement('div', {
+                key: 'contact-card',
+                style: {
+                  backgroundColor: '#f8f9fa',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e9ecef'
+                }
+              }, [
+                React.createElement('h4', {
+                  key: 'contact-title',
+                  style: {
+                    margin: '0 0 15px 0',
+                    color: '#495057',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }
+                }, [
+                  React.createElement('span', { key: 'icon', style: { marginRight: '8px' } }, '📧'),
+                  'Contact Information'
+                ]),
+                React.createElement('div', { key: 'contact-details', style: { fontSize: '0.95rem', lineHeight: '1.6' } }, [
+                  React.createElement('div', { key: 'email', style: { marginBottom: '8px' } }, [
+                    React.createElement('strong', { key: 'label', style: { color: '#6c757d' } }, 'Email: '),
+                    React.createElement('span', { key: 'value', style: { color: '#495057' } }, doctor.email)
+                  ]),
+                  React.createElement('div', { key: 'phone', style: { marginBottom: '8px' } }, [
+                    React.createElement('strong', { key: 'label', style: { color: '#6c757d' } }, 'Phone: '),
+                    React.createElement('span', { key: 'value', style: { color: '#495057' } }, doctor.phone || 'Not provided')
+                  ]),
+                  React.createElement('div', { key: 'id', style: { marginBottom: '0' } }, [
+                    React.createElement('strong', { key: 'label', style: { color: '#6c757d' } }, 'Doctor ID: '),
+                    React.createElement('span', { key: 'value', style: { color: '#495057' } }, doctor.user_id)
+                  ])
+                ])
               ]),
-              React.createElement('div', { key: 'col-2', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Phone: '),
-                React.createElement('span', { key: 'value' }, doctor.phone || 'N/A')
-              ])
-            ]),
-            
-            React.createElement('div', { key: 'row-3', className: 'row', style: { marginBottom: '15px' } }, [
-              React.createElement('div', { key: 'col-1', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Specialization: '),
-                React.createElement('span', { key: 'value', className: 'badge badge-primary' }, doctor.specialization)
-              ]),
-              React.createElement('div', { key: 'col-2', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'License Number: '),
-                React.createElement('span', { key: 'value' }, doctor.license_number || 'N/A')
-              ])
-            ]),
-            
-            React.createElement('div', { key: 'row-4', className: 'row', style: { marginBottom: '15px' } }, [
-              React.createElement('div', { key: 'col-1', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Block Status: '),
-                React.createElement('span', { 
-                  key: 'value',
-                  className: doctor.is_blocked == 1 ? 'status-badge status-blocked' : 'status-badge status-active'
-                }, doctor.is_blocked == 1 ? 'Blocked' : 'Active')
-              ]),
-              React.createElement('div', { key: 'col-2', className: 'col-md-6' }, [
-                React.createElement('strong', { key: 'label' }, 'Email Verified: '),
-                React.createElement('span', { 
-                  key: 'value',
-                  className: doctor.is_verified === 'authorized' ? 'status-badge status-verified' : 'status-badge status-unverified'
-                }, doctor.is_verified === 'authorized' ? 'Yes' : 'No')
-              ])
-            ]),
-            
-            React.createElement('div', { key: 'row-5', className: 'row', style: { marginBottom: '15px' } }, [
-              React.createElement('div', { key: 'col-1', className: 'col-md-12' }, [
-                React.createElement('strong', { key: 'label' }, 'Assigned Hospitals: '),
-                React.createElement('span', { key: 'value' }, doctor.hospitals || 'None')
+              
+              // Professional Information Card
+              React.createElement('div', {
+                key: 'professional-card',
+                style: {
+                  backgroundColor: '#f8f9fa',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e9ecef'
+                }
+              }, [
+                React.createElement('h4', {
+                  key: 'professional-title',
+                  style: {
+                    margin: '0 0 15px 0',
+                    color: '#495057',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }
+                }, [
+                  React.createElement('span', { key: 'icon', style: { marginRight: '8px' } }, '👨‍⚕️'),
+                  'Professional Details'
+                ]),
+                React.createElement('div', { key: 'professional-details', style: { fontSize: '0.95rem', lineHeight: '1.6' } }, [
+                  React.createElement('div', { key: 'license', style: { marginBottom: '8px' } }, [
+                    React.createElement('strong', { key: 'label', style: { color: '#6c757d' } }, 'License: '),
+                    React.createElement('span', { key: 'value', style: { color: '#495057' } }, doctor.license_number || 'Not provided')
+                  ]),
+                  React.createElement('div', { key: 'hospitals', style: { marginBottom: '0' } }, [
+                    React.createElement('strong', { key: 'label', style: { color: '#6c757d' } }, 'Hospitals: '),
+                    React.createElement('span', { key: 'value', style: { color: '#495057' } }, doctor.hospitals || 'Not assigned')
+                  ])
+                ])
               ])
             ])
           ])
@@ -540,6 +703,11 @@
       });
 
       const handleAddSchedule = async () => {
+        if (!newSchedule.start_time || !newSchedule.end_time) {
+          alert('Please select both start and end times');
+          return;
+        }
+        
         try {
           const response = await axios.post('admin_api.php?action=doctor_schedule_add', {
             doctor_id: doctor.user_id,
@@ -555,6 +723,8 @@
       };
 
       const handleDeleteSchedule = async (scheduleId) => {
+        if (!confirm('Are you sure you want to delete this schedule?')) return;
+        
         try {
           const response = await axios.post('admin_api.php?action=doctor_schedule_delete', {
             schedule_id: scheduleId
@@ -578,7 +748,7 @@
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.8)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -590,95 +760,385 @@
           key: 'schedule-modal-content',
           className: 'modal-content',
           style: {
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            maxWidth: '800px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflow: 'auto'
+            backgroundColor: '#fff',
+            borderRadius: '20px',
+            maxWidth: '900px',
+            width: '95%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            position: 'relative'
           },
           onClick: (e) => e.stopPropagation()
         }, [
-          React.createElement('div', { key: 'schedule-header', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } }, [
-            React.createElement('h3', { key: 'title' }, `Schedule for ${doctor.doctor_name}`),
-            React.createElement('button', { key: 'close', onClick: onClose, style: { background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' } }, '×')
+          // Header
+          React.createElement('div', { 
+            key: 'schedule-header', 
+            style: { 
+              background: 'linear-gradient(135deg, #a259ff 0%, #8a4ae6 100%)',
+              color: '#fff',
+              padding: '20px 30px',
+              borderRadius: '20px 20px 0 0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            } 
+          }, [
+            React.createElement('div', { key: 'header-info' }, [
+              React.createElement('h3', { 
+                key: 'title', 
+                style: { margin: 0, fontSize: '1.5rem', fontWeight: '600' } 
+              }, 'Doctor Schedule Management'),
+              React.createElement('p', { 
+                key: 'subtitle', 
+                style: { margin: '5px 0 0 0', fontSize: '0.9rem', opacity: 0.9 } 
+              }, `Managing schedule for Dr. ${doctor.doctor_name}`)
+            ]),
+            React.createElement('button', { 
+              key: 'close', 
+              onClick: onClose, 
+              style: { 
+                background: 'rgba(255,255,255,0.2)', 
+                border: 'none', 
+                borderRadius: '50%',
+                width: '35px',
+                height: '35px',
+                fontSize: '18px', 
+                cursor: 'pointer',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              } 
+            }, '×')
           ]),
           
-          React.createElement('div', { key: 'add-schedule', style: { marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' } }, [
-            React.createElement('h5', { key: 'add-title' }, 'Add New Schedule'),
-            React.createElement('div', { key: 'add-form', className: 'row' }, [
-              React.createElement('div', { key: 'day-col', className: 'col-md-4' }, [
-                React.createElement('label', { key: 'day-label' }, 'Day'),
-                React.createElement('select', {
-                  key: 'day-select',
-                  className: 'form-control',
-                  value: newSchedule.day_of_week,
-                  onChange: (e) => setNewSchedule({...newSchedule, day_of_week: parseInt(e.target.value)})
-                }, days.map((day, index) => 
-                  React.createElement('option', { key: index + 1, value: index + 1 }, day)
-                ))
+          // Content
+          React.createElement('div', { 
+            key: 'schedule-body', 
+            style: { padding: '30px' } 
+          }, [
+            // Add New Schedule Section
+            React.createElement('div', { 
+              key: 'add-schedule-section', 
+              style: { 
+                backgroundColor: '#f8f9fa',
+                padding: '25px',
+                borderRadius: '15px',
+                marginBottom: '30px',
+                border: '1px solid #e9ecef'
+              } 
+            }, [
+              React.createElement('h4', { 
+                key: 'add-title', 
+                style: { 
+                  margin: '0 0 20px 0', 
+                  color: '#495057',
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center'
+                } 
+              }, [
+                React.createElement('span', { key: 'icon', style: { marginRight: '10px' } }, '➕'),
+                'Add New Schedule Slot'
               ]),
-              React.createElement('div', { key: 'start-col', className: 'col-md-3' }, [
-                React.createElement('label', { key: 'start-label' }, 'Start Time'),
-                React.createElement('input', {
-                  key: 'start-input',
-                  type: 'time',
-                  className: 'form-control',
-                  value: newSchedule.start_time,
-                  onChange: (e) => setNewSchedule({...newSchedule, start_time: e.target.value})
-                })
-              ]),
-              React.createElement('div', { key: 'end-col', className: 'col-md-3' }, [
-                React.createElement('label', { key: 'end-label' }, 'End Time'),
-                React.createElement('input', {
-                  key: 'end-input',
-                  type: 'time',
-                  className: 'form-control',
-                  value: newSchedule.end_time,
-                  onChange: (e) => setNewSchedule({...newSchedule, end_time: e.target.value})
-                })
-              ]),
-              React.createElement('div', { key: 'add-btn-col', className: 'col-md-2', style: { display: 'flex', alignItems: 'end' } }, [
-                React.createElement('button', {
-                  key: 'add-btn',
-                  className: 'btn btn-primary',
-                  onClick: handleAddSchedule
-                }, 'Add')
+              
+              React.createElement('div', { 
+                key: 'add-form', 
+                style: { 
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '20px',
+                  alignItems: 'end'
+                } 
+              }, [
+                React.createElement('div', { key: 'day-field' }, [
+                  React.createElement('label', { 
+                    key: 'day-label', 
+                    style: { 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: '600', 
+                      color: '#495057',
+                      fontSize: '0.9rem'
+                    } 
+                  }, 'Day of Week'),
+                  React.createElement('select', {
+                    key: 'day-select',
+                    style: {
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      backgroundColor: '#fff',
+                      cursor: 'pointer'
+                    },
+                    value: newSchedule.day_of_week,
+                    onChange: (e) => setNewSchedule({...newSchedule, day_of_week: parseInt(e.target.value)})
+                  }, days.map((day, index) => 
+                    React.createElement('option', { key: index + 1, value: index + 1 }, day)
+                  ))
+                ]),
+                
+                React.createElement('div', { key: 'start-field' }, [
+                  React.createElement('label', { 
+                    key: 'start-label', 
+                    style: { 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: '600', 
+                      color: '#495057',
+                      fontSize: '0.9rem'
+                    } 
+                  }, 'Start Time'),
+                  React.createElement('input', {
+                    key: 'start-input',
+                    type: 'time',
+                    style: {
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      backgroundColor: '#fff'
+                    },
+                    value: newSchedule.start_time,
+                    onChange: (e) => setNewSchedule({...newSchedule, start_time: e.target.value})
+                  })
+                ]),
+                
+                React.createElement('div', { key: 'end-field' }, [
+                  React.createElement('label', { 
+                    key: 'end-label', 
+                    style: { 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      fontWeight: '600', 
+                      color: '#495057',
+                      fontSize: '0.9rem'
+                    } 
+                  }, 'End Time'),
+                  React.createElement('input', {
+                    key: 'end-input',
+                    type: 'time',
+                    style: {
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      backgroundColor: '#fff'
+                    },
+                    value: newSchedule.end_time,
+                    onChange: (e) => setNewSchedule({...newSchedule, end_time: e.target.value})
+                  })
+                ]),
+                
+                React.createElement('div', { key: 'add-button-field' }, [
+                  React.createElement('button', {
+                    key: 'add-btn',
+                    style: {
+                      width: '100%',
+                      padding: '12px 20px',
+                      backgroundColor: '#a259ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    },
+                    onMouseOver: (e) => {
+                      e.target.style.backgroundColor = '#8a4ae6';
+                      e.target.style.transform = 'translateY(-1px)';
+                    },
+                    onMouseOut: (e) => {
+                      e.target.style.backgroundColor = '#a259ff';
+                      e.target.style.transform = 'translateY(0)';
+                    },
+                    onClick: handleAddSchedule
+                  }, 'Add Schedule')
+                ])
               ])
-            ])
-          ]),
-          
-          React.createElement('div', { key: 'schedules-list' }, [
-            React.createElement('h5', { key: 'list-title' }, 'Current Schedules'),
-            schedules.length > 0 ? 
-              React.createElement('table', { key: 'schedules-table', className: 'table' }, [
-                React.createElement('thead', { key: 'thead' }, 
-                  React.createElement('tr', { key: 'header-row' }, [
-                    React.createElement('th', { key: 'day-header' }, 'Day'),
-                    React.createElement('th', { key: 'start-header' }, 'Start Time'),
-                    React.createElement('th', { key: 'end-header' }, 'End Time'),
-                    React.createElement('th', { key: 'actions-header' }, 'Actions')
-                  ])
-                ),
-                React.createElement('tbody', { key: 'tbody' },
+            ]),
+            
+            // Current Schedules Section
+            React.createElement('div', { key: 'schedules-section' }, [
+              React.createElement('h4', { 
+                key: 'schedules-title', 
+                style: { 
+                  margin: '0 0 20px 0', 
+                  color: '#495057',
+                  fontSize: '1.2rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center'
+                } 
+              }, [
+                React.createElement('span', { key: 'icon', style: { marginRight: '10px' } }, '📅'),
+                'Current Schedule'
+              ]),
+              
+              schedules.length > 0 ? 
+                React.createElement('div', { 
+                  key: 'schedules-grid', 
+                  style: { 
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '15px'
+                  } 
+                }, 
                   schedules.map(schedule => 
-                    React.createElement('tr', { key: schedule.id }, [
-                      React.createElement('td', { key: 'day' }, days[schedule.day_of_week - 1]),
-                      React.createElement('td', { key: 'start' }, schedule.start_time),
-                      React.createElement('td', { key: 'end' }, schedule.end_time),
-                      React.createElement('td', { key: 'actions' }, [
+                    React.createElement('div', { 
+                      key: schedule.id, 
+                      style: {
+                        backgroundColor: '#fff',
+                        border: '2px solid #e9ecef',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      },
+                      onMouseOver: (e) => {
+                        e.target.style.borderColor = '#a259ff';
+                        e.target.style.boxShadow = '0 4px 15px rgba(162, 89, 255, 0.2)';
+                      },
+                      onMouseOut: (e) => {
+                        e.target.style.borderColor = '#e9ecef';
+                        e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                      }
+                    }, [
+                      React.createElement('div', { 
+                        key: 'schedule-header', 
+                        style: { 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          marginBottom: '15px'
+                        } 
+                      }, [
+                        React.createElement('h5', { 
+                          key: 'day-name', 
+                          style: { 
+                            margin: 0, 
+                            color: '#a259ff',
+                            fontSize: '1.1rem',
+                            fontWeight: '600'
+                          } 
+                        }, days[schedule.day_of_week - 1]),
                         React.createElement('button', {
-                          key: 'delete',
-                          className: 'btn btn-danger btn-sm',
+                          key: 'delete-btn',
+                          style: {
+                            background: '#ff4757',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px 10px',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                          },
                           onClick: () => handleDeleteSchedule(schedule.id)
                         }, 'Delete')
+                      ]),
+                      
+                      React.createElement('div', { 
+                        key: 'time-info', 
+                        style: { 
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          backgroundColor: '#f8f9fa',
+                          padding: '12px',
+                          borderRadius: '8px'
+                        } 
+                      }, [
+                        React.createElement('div', { key: 'start-time', style: { textAlign: 'center' } }, [
+                          React.createElement('div', { 
+                            key: 'start-label', 
+                            style: { 
+                              fontSize: '0.8rem', 
+                              color: '#6c757d', 
+                              fontWeight: '600',
+                              marginBottom: '4px'
+                            } 
+                          }, 'START'),
+                          React.createElement('div', { 
+                            key: 'start-value', 
+                            style: { 
+                              fontSize: '1.1rem', 
+                              fontWeight: '600', 
+                              color: '#495057' 
+                            } 
+                          }, schedule.start_time)
+                        ]),
+                        React.createElement('div', { 
+                          key: 'separator', 
+                          style: { 
+                            fontSize: '1.2rem', 
+                            color: '#a259ff',
+                            fontWeight: 'bold'
+                          } 
+                        }, '→'),
+                        React.createElement('div', { key: 'end-time', style: { textAlign: 'center' } }, [
+                          React.createElement('div', { 
+                            key: 'end-label', 
+                            style: { 
+                              fontSize: '0.8rem', 
+                              color: '#6c757d', 
+                              fontWeight: '600',
+                              marginBottom: '4px'
+                            } 
+                          }, 'END'),
+                          React.createElement('div', { 
+                            key: 'end-value', 
+                            style: { 
+                              fontSize: '1.1rem', 
+                              fontWeight: '600', 
+                              color: '#495057' 
+                            } 
+                          }, schedule.end_time)
+                        ])
                       ])
                     ])
                   )
-                )
-              ]) :
-              React.createElement('p', { key: 'no-schedules' }, 'No schedules found')
+                ) :
+                React.createElement('div', { 
+                  key: 'no-schedules', 
+                  style: { 
+                    textAlign: 'center', 
+                    padding: '40px 20px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '12px',
+                    border: '2px dashed #dee2e6'
+                  } 
+                }, [
+                  React.createElement('div', { 
+                    key: 'no-schedules-icon', 
+                    style: { fontSize: '3rem', marginBottom: '15px' } 
+                  }, '📅'),
+                  React.createElement('h5', { 
+                    key: 'no-schedules-title', 
+                    style: { 
+                      margin: '0 0 10px 0', 
+                      color: '#6c757d',
+                      fontSize: '1.1rem'
+                    } 
+                  }, 'No Schedule Found'),
+                  React.createElement('p', { 
+                    key: 'no-schedules-desc', 
+                    style: { 
+                      margin: 0, 
+                      color: '#6c757d',
+                      fontSize: '0.9rem'
+                    } 
+                  }, 'Add schedule slots to manage doctor availability')
+                ])
+            ])
           ])
         ])
       ]);
