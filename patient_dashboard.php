@@ -56,7 +56,9 @@ try {
     $rep_stmt->bind_param('i', $user_id);
     $rep_stmt->execute();
     $rep_res = $rep_stmt->get_result();
-    while ($r = $rep_res->fetch_assoc()) { $reports[] = $r; }
+    while ($r = $rep_res->fetch_assoc()) {
+        $reports[] = $r;
+    }
 } catch (Throwable $e) {
     // Silently ignore to avoid breaking the dashboard
 }
@@ -435,6 +437,49 @@ if (isset($_SESSION['user_id'])) {
                             <div class="appointment-specialist">Specialist in <?php echo htmlspecialchars($appointment['specialization']); ?></div>
                             <div class="appointment-details">
                                 <strong>Appointment Time:</strong> <?php echo date('l, F j, Y g:i A', strtotime($appointment['timeslot'])); ?>
+                                <?php
+                                // Calculate serial number
+                                $serial_query = "SELECT COUNT(*) as serial_no 
+                                                   FROM appointments 
+                                                   WHERE doctor_id = ? 
+                                                   AND hospital_id = ? 
+                                                   AND DATE(timeslot) = DATE(?) 
+                                                   AND TIME(timeslot) <= TIME(?)";
+                                $stmt = $conn->prepare($serial_query);
+                                $stmt->bind_param(
+                                    "iiss",
+                                    $appointment['doctor_id'],
+                                    $appointment['hospital_id'],
+                                    $appointment['timeslot'],
+                                    $appointment['timeslot']
+                                );
+                                $stmt->execute();
+                                $serial_result = $stmt->get_result();
+                                $serial_no = $serial_result->fetch_assoc()['serial_no'];
+
+                                // Calculate waiting time
+                                $people_ahead = $serial_no - 1;
+                                $total_minutes = $people_ahead * 20;
+                                $hours = floor($total_minutes / 60);
+                                $minutes = $total_minutes % 60;
+                                ?>
+                                <div class="serial-info" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                    <strong style="color: #7f5fff;">Your Serial Number:</strong> <?php echo $serial_no; ?>
+                                    <?php if ($people_ahead > 0): ?>
+                                        <br>
+                                        <strong style="color: #7f5fff;">Estimated Waiting Time:</strong>
+                                        <?php
+                                        if ($hours > 0) {
+                                            echo $hours . ' hour' . ($hours > 1 ? 's' : '');
+                                            if ($minutes > 0) {
+                                                echo ' ' . $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+                                            }
+                                        } else {
+                                            echo $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+                                        }
+                                        ?>
+                                    <?php endif; ?>
+                                </div>
                                 <?php if (!empty($appointment['notes'])): ?>
                                     <br><strong>Notes:</strong> <?php echo htmlspecialchars($appointment['notes']); ?>
                                 <?php endif; ?>
