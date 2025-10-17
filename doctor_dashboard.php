@@ -58,12 +58,14 @@ while ($row = $result->fetch_assoc()) {
 // Get today's appointments
 $today = date('Y-m-d');
 $appointments_query = "SELECT a.*, p.name as patient_name, p.phone as patient_phone, 
-                              pat.gender, pat.date_of_birth, pat.address
+                      pat.gender, pat.date_of_birth, pat.address
                       FROM appointments a 
                       JOIN users p ON a.patient_id = p.id 
                       JOIN patients pat ON p.id = pat.user_id
                       WHERE a.doctor_id = ? 
+                      AND a.appointment_status = 'pending'  
                       ORDER BY a.timeslot DESC";
+
 $stmt = $conn->prepare($appointments_query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -244,6 +246,19 @@ $appointments = $stmt->get_result();
             transition: background 0.2s;
         }
 
+        .complete-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 2.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            transition: background 0.2s;
+        }
+
         .view-file-btn {
             background: #ff8d2f;
             box-shadow: 0 2px 8px #ff8d2f44;
@@ -259,6 +274,10 @@ $appointments = $stmt->get_result();
 
         .view-file-btn:hover {
             background: rgb(54, 25, 6);
+        }
+
+        .complete-btn:hover {
+            background: #388E3C;
         }
 
         /* Popup styles copied from patient_dashboard */
@@ -570,6 +589,7 @@ $appointments = $stmt->get_result();
                                     <button class="connect-btn" onclick="goToVideo(<?php echo $appointment['id']; ?>, <?php echo $appointment['patient_id']; ?>)">Connect</button>
                                     <button class="send-time-btn" onclick="sendMeetingTime(<?php echo $appointment['patient_id']; ?>)">Send Time</button>
                                     <button class="view-file-btn" onclick="viewFile(<?php echo $appointment['id']; ?>, '<?php echo htmlspecialchars($appointment['report_file'] ?? ''); ?>')">View File</button>
+                                    <button class="complete-btn" onclick="confirmComplete(<?php echo $appointment['id']; ?>)">Complete</button>
                                 </div>
                             </div>
                         <?php endwhile; ?>
@@ -733,6 +753,37 @@ $appointments = $stmt->get_result();
                 alert('Error saving meeting time');
             });
     };
+
+    function confirmComplete(appointmentId) {
+        if (confirm('Are you sure you want to mark this appointment as complete?')) {
+            fetch('update_appointment_status.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        appointment_id: appointmentId,
+                        status: 'confirmed'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Appointment marked as complete!');
+                        // Remove the appointment card from view
+                        const appointmentCard = document.querySelector(`button[onclick="confirmComplete(${appointmentId})"]`)
+                            .closest('.appointment-card');
+                        appointmentCard.remove();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to update appointment status'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating appointment status');
+                });
+        }
+    }
 </script>
 
 </html>

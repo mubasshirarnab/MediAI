@@ -76,21 +76,28 @@ try {
 
     $appointment_id = $conn->insert_id;
 
-    // Calculate serial number
+    // Calculate serial number - only count pending appointments
     $serial_query = "SELECT COUNT(*) as serial_no 
                     FROM appointments 
                     WHERE doctor_id = ? 
                     AND hospital_id = ? 
-                    AND DATE(timeslot) = DATE(?)";
+                    AND DATE(timeslot) = DATE(?)
+                    AND appointment_status = 'pending'";  // Only count pending appointments
 
     $serial_stmt = $conn->prepare($serial_query);
-    $serial_stmt->bind_param("iis", $doctor_id, $hospital_id, $timeslot);
+    $serial_stmt->bind_param(
+        "iis",
+        $doctor_id,
+        $hospital_id,
+        $timeslot
+    );
     $serial_stmt->execute();
     $serial_result = $serial_stmt->get_result();
     $serial_no = $serial_result->fetch_assoc()['serial_no'];
 
     $conn->commit();
 
+    // Return success response with serial number
     echo json_encode([
         'success' => true,
         'message' => "Appointment booked successfully! Your serial number is {$serial_no}.",

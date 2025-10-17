@@ -28,6 +28,7 @@ $appointments_query = "SELECT a.*, u.name as doctor_name, d.specialization
                        JOIN users u ON a.doctor_id = u.id 
                        JOIN doctors d ON u.id = d.user_id 
                        WHERE a.patient_id = ? 
+                       AND a.appointment_status = 'pending'
                        ORDER BY a.timeslot ASC";
 $appt_stmt = $conn->prepare($appointments_query);
 $appt_stmt->bind_param("i", $user_id);
