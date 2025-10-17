@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 17, 2025 at 02:52 PM
+-- Generation Time: Oct 17, 2025 at 09:49 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -104,11 +104,8 @@ CREATE TABLE `appointments` (
 
 INSERT INTO `appointments` (`id`, `patient_id`, `patient_name`, `doctor_id`, `notes`, `phone`, `email`, `timeslot`, `report_file`, `hospital_id`, `appointment_status`, `created_at`) VALUES
 (1, 14, NULL, 15, 'Feeling pain in my heart ', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-06-30 10:00:00', NULL, NULL, 'pending', '2025-10-15 16:59:29'),
-(5, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:51:38'),
-(6, 14, 'Samad Ali', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 18:52:24'),
-(7, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-25 20:18:00', NULL, 7, 'pending', '2025-10-15 19:44:15'),
-(8, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'pending', '2025-10-16 19:36:28'),
-(9, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'pending', '2025-10-16 19:48:01');
+(10, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'confirmed', '2025-10-17 17:34:07'),
+(11, 14, 'Shahin Chowdhury', 19, '0', '01319312217', 'schowdhury222152@bscse.uiu.ac.bd', '2025-10-18 20:18:00', NULL, 7, 'confirmed', '2025-10-17 17:40:47');
 
 -- --------------------------------------------------------
 
@@ -766,7 +763,8 @@ CREATE TABLE `lab_reports` (
 INSERT INTO `lab_reports` (`id`, `patient_id`, `test_name`, `report_file`, `uploaded_by`, `uploaded_at`, `report_date`) VALUES
 (1, 16, 'blood count', 'uploads/reports/Assignment_3__1__pid16_20251008205617.pdf', 7, '2025-10-08 18:56:17', '2025-10-08'),
 (2, 14, 'Heart test', 'uploads/reports/printLearner_pid14_20251008205735.pdf', 7, '2025-10-08 18:57:35', '2025-10-08'),
-(3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01');
+(3, 14, 'Brain test', 'uploads/reports/Assignment_3__1__pid14_20251008211132.pdf', 7, '2025-10-08 19:11:32', '2025-10-01'),
+(4, 14, 'Blood Test', 'uploads/reports/test_pid14_20251017213244.png', 7, '2025-10-17 19:32:44', '2025-10-18');
 
 -- --------------------------------------------------------
 
@@ -953,7 +951,8 @@ CREATE TABLE `meeting_code` (
 
 INSERT INTO `meeting_code` (`id`, `patient_id`, `doctor_id`, `meeting_code`) VALUES
 (1, 14, 15, '3911'),
-(2, 14, 14, '6578');
+(2, 14, 14, '6578'),
+(3, 14, 19, '5804');
 
 -- --------------------------------------------------------
 
@@ -1882,7 +1881,7 @@ ALTER TABLE `ai_conversations`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `available_hours`
@@ -2020,7 +2019,7 @@ ALTER TABLE `inventory_transactions`
 -- AUTO_INCREMENT for table `lab_reports`
 --
 ALTER TABLE `lab_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `medication`
@@ -2056,7 +2055,7 @@ ALTER TABLE `medicine_suggestions`
 -- AUTO_INCREMENT for table `meeting_code`
 --
 ALTER TABLE `meeting_code`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `packages`
