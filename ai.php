@@ -246,6 +246,11 @@ if ($stmt_conv_list) {
 </head>
 
 <body>
+  <iframe
+    src="Navbar/navbar.html"
+    frameborder="0"
+    style="width: 100%; height: 80px"></iframe>
+
   <?php require_once 'navbar.php'; ?>
 
   <div class="container">
@@ -315,11 +320,12 @@ if ($stmt_conv_list) {
           <div class="quick-actions">
             <button class="add-button">+</button>
             <button class="action-button" onclick="goToRiskPrediction()">🔮 Predict</button>
-            <script>
-              function goToRiskPrediction() {
-                window.location.href = 'risk_predict_model/risk_prediction.php';
-              }
-            </script>
+              <script>
+                function goToRiskPrediction() {
+                  // Use web-safe forward slashes for URLs so it works across platforms
+                  window.location.href = 'risk_predict_model/risk_prediction_react.html';
+                }
+              </script>
           </div>
         </div>
       </div>
