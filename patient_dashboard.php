@@ -1,10 +1,12 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
-// Add navbar at the top
 
-// Check if user is logged in and is a patient
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] != 'patient') {
+// Check session timeout and require login
+SessionManager::requireActiveSession();
+
+// Check if user is a patient
+if ($_SESSION['role'] != 'patient') {
     header("Location: login.php");
     exit();
 }
@@ -639,12 +641,20 @@ if (isset($_SESSION['user_id'])) {
             document.getElementById('analysis-backdrop').style.display = 'block';
             document.getElementById('analysis-content').innerHTML = 'Analyzing report...';
 
-            // Fetch analysis results
+            // Fetch analysis results (summary)
             fetch(`analyze_report.php?report_id=${reportId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('analysis-content').innerHTML = data.text;
+                        // Prefer concise summary field returned from server
+                        const summary = data.summary || data.text || '(No summary available)';
+                        // Display summary and provide a button to toggle full extracted text
+                        let html = `<div style="white-space:pre-wrap;">${escapeHtml(summary)}</div>`;
+                        if (data.text) {
+                            html += `<hr style="border-color:#2b2d48">`;
+                            html += `<details style="color:#cfcfcf"><summary style="cursor:pointer">Show full extracted text</summary><pre style="white-space:pre-wrap; color:#d0d0d0; font-family:monospace">${escapeHtml(data.text)}</pre></details>`;
+                        }
+                        document.getElementById('analysis-content').innerHTML = html;
                     } else {
                         document.getElementById('analysis-content').innerHTML = 'Error: ' + data.message;
                     }
@@ -658,6 +668,17 @@ if (isset($_SESSION['user_id'])) {
         function closeAnalysisPopup() {
             document.getElementById('analysis-popup').style.display = 'none';
             document.getElementById('analysis-backdrop').style.display = 'none';
+        }
+
+        // Simple HTML escaper to prevent inserting raw HTML
+        function escapeHtml(unsafe) {
+            if (!unsafe && unsafe !== "") return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         // Close popup when clicking backdrop

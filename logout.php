@@ -1,10 +1,11 @@
 <?php
-session_start();
+require_once 'session_manager.php';
+require_once 'dbConnect.php';
 
-$_SESSION = array();
+// Logout user using session manager
+SessionManager::destroySession();
 
-session_destroy();
-
-header("Location: login.php");
+// Redirect to login with logout message
+header("Location: login.php?logout=1");
 exit();
-?> 
+?>

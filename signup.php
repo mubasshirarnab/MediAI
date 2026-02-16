@@ -1,15 +1,10 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
 
-// Include PHPMailer files
-require 'mail/PHPMailer.php';
-require 'mail/SMTP.php';
-require 'mail/Exception.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
+// Start session with timeout management
+SessionManager::startSession();
+require_once 'email_config.php';
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);
@@ -40,6 +35,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!isset($role_map[$account_type])) {
       throw new Exception("Invalid account type selected");
+    }
+    
+    // Validate password match
+    if ($password !== $confirm_password) {
+      throw new Exception("Passwords do not match!");
     }
 
     $role_id = $role_map[$account_type];
@@ -125,40 +125,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         throw new Exception("Role data insertion failed: " . $stmt->error);
       }
 
-      // Send verification email using PHPMailer
-      $mail = new PHPMailer(true);
-
-      try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'mubasshirahmed263@gmail.com';
-        // IMPORTANT: Use a Gmail App Password here, not your regular Gmail password.
-        // See: https://myaccount.google.com/apppasswords
-        $mail->Password = 'xeen nwrp mclu mqcf'; // <-- Replace with your App Password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        // Recipients
-        $mail->setFrom('mubasshirahmed263@gmail.com', 'MediAI');
-        $mail->addAddress($email);
-
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'MediAI - Email Verification';
-        $mail->Body = "
-                    <h2>Welcome to MediAI!</h2>
-                    <p>Your verification code is: <strong>$otp</strong></p>
-                    <p>Please enter this code on the verification page to complete your registration.</p>
-                    <p>If you didn't create an account, please ignore this email.</p>
-                ";
-
-        $mail->send();
-      } catch (Exception $e) {
-        // If email fails, rollback the transaction
+      // Send verification email using centralized config
+      $email_sent = EmailConfig::sendVerificationEmail($email, $otp, $full_name);
+      
+      if (!$email_sent && !isset($_SESSION['fallback_otp'])) {
+        // If both email and fallback failed, rollback
         $conn->rollback();
-        throw new Exception("Failed to send verification email: " . $e->getMessage());
+        throw new Exception("Failed to send verification email. Please try again.");
       }
 
       // Store email in session for verification
@@ -365,6 +338,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>
           <input type="radio" name="accountType" value="patient" checked />
           Patient
+        </label>
+        <label>
+          <input type="radio" name="accountType" value="doctor" />
+          Doctor
         </label>
         <label>
           <input type="radio" name="accountType" value="hospital" />

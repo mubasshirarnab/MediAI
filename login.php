@@ -1,6 +1,9 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
+
+// Start session with timeout management
+SessionManager::startSession();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $email = $_POST['email'];
@@ -32,6 +35,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $_SESSION['email'] = $user['email'];
       $_SESSION['role'] = $user['role_name'];
       $_SESSION['full_name'] = $user['name'];
+      
+      // Update last activity time
+      SessionManager::updateActivity();
 
       // Redirect based on role_id
       switch ($user['role_id']) {
@@ -257,12 +263,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <img class="login-logo-img" src="images/LOGO.png" alt="MEDIAi logo" />
 
       </div>
-      <?php if (isset($_GET['signup']) && $_GET['signup'] == 'success'): ?>
-        <div class="success-message">Signup successful! Please login.</div>
-      <?php endif; ?>
-      <?php if (isset($error)): ?>
-        <div class="error-message"><?php echo $error; ?></div>
-      <?php endif; ?>
+      <?php 
+      SessionManager::showTimeoutMessage();
+      if (isset($_GET['logout']) && $_GET['logout'] == '1') {
+        echo '<div class="success-message">You have been logged out successfully.</div>';
+      }
+      if (isset($_GET['verified']) && $_GET['verified'] == '1') {
+        echo '<div class="success-message">Email verified successfully! Please login.</div>';
+      }
+      if (isset($_GET['signup']) && $_GET['signup'] == 'success') {
+        echo '<div class="success-message">Signup successful! Please login.</div>';
+      }
+      if (isset($error)) {
+        echo '<div class="error-message">' . htmlspecialchars($error) . '</div>';
+      }
+      ?>
       <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="login-form">
         <div class="input-group">
           <span class="input-icon"><i class="fas fa-envelope"></i></span>

@@ -1,0 +1,4 @@
+<?php
+// Medical Data Encryption Key
+putenv('MEDICAL_ENCRYPTION_KEY=ì¸ÜÌÓÝ&ƒ	^™kâAÝù¤T¡òämr£Í‘');
+$_ENV['MEDICAL_ENCRYPTION_KEY'] = 'ì¸ÜÌÓÝ&ƒ	^™kâAÝù¤T¡òämr£Í‘';

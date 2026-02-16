@@ -1,6 +1,9 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
+
+// Start session with timeout management
+SessionManager::startSession();
 
 // Check if user is coming from signup
 if (!isset($_SESSION['verify_email'])) {
@@ -137,6 +140,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p>We've sent a verification code to <?php echo htmlspecialchars($email); ?></p>
         </div>
 
+        <?php 
+        SessionManager::showTimeoutMessage();
+        if (isset($_GET['resent']) && $_GET['resent'] == '1') {
+            echo '<div class="success-message" style="background: #4CAF50; color: white; padding: 15px; text-align: center; margin-bottom: 20px; border-radius: 5px;">Verification code resent successfully!</div>';
+        }
+        if (isset($_GET['error']) && $_GET['error'] == '1') {
+            echo '<div class="error-message" style="background: #f44336; color: white; padding: 15px; text-align: center; margin-bottom: 20px; border-radius: 5px;">Failed to send email. Please try again.</div>';
+        }
+        ?>
+
         <?php if ($error): ?>
             <div class="error-message"><?php echo $error; ?></div>
         <?php endif; ?>
@@ -148,6 +161,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <button type="submit" class="verify-button">Verify Email</button>
         </form>
+
+        <?php if (isset($_SESSION['fallback_otp'])): ?>
+            <div style="background: #ff9800; color: white; padding: 15px; text-align: center; margin: 20px 0; border-radius: 5px;">
+                <strong>Email Service Unavailable</strong><br>
+                Your verification code is: <strong style="font-size: 20px;"><?php echo $_SESSION['fallback_otp']; ?></strong><br>
+                <small>Use this code to verify your account.</small>
+            </div>
+        <?php endif; ?>
 
         <div class="resend-link">
             <a href="resend_verification.php">Didn't receive the code? Resend</a>

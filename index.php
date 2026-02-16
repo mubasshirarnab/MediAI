@@ -1,16 +1,11 @@
 <?php
 // index.php
 
-session_start();
-
-// 1) Require login
-if (!isset($_SESSION['user_id'])) {
-  header("Location: login.php");
-  exit();
-}
-
-// 2) Connect to the database
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
+
+// Check session timeout and require login
+SessionManager::requireActiveSession();
 if ($conn->connect_error) {
   die("Database connection failed: " . $conn->connect_error);
 }
@@ -65,6 +60,8 @@ if ($result) {
     referrerpolicy="no-referrer" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Session Timeout Styles -->
+  <link rel="stylesheet" href="session_timeout_styles.css">
 </head>
 
 <body>
@@ -328,6 +325,9 @@ if ($result) {
       list.style.transform = `translateX(${scrollX}px)`;
     });
   </script>
+  
+  <!-- Session Timeout UI -->
+  <?php require_once 'session_timeout_ui.php'; includeSessionTimeoutUI(); ?>
 
 </body>
 

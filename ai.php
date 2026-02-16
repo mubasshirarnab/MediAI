@@ -1,11 +1,9 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
 
-if (!isset($_SESSION['user_id'])) {
-  header("Location: login.php");
-  exit();
-}
+// Check session timeout and require login
+SessionManager::requireActiveSession();
 
 $user_id = $_SESSION['user_id'];
 
@@ -256,6 +254,14 @@ if ($stmt_conv_list) {
   <div class="container">
     <aside class="sidebar">
       <div class="sidebar-scroll">
+        <!-- NEW CHAT Button -->
+        <div class="new-chat-section">
+          <button class="new-chat-button" onclick="startNewChatSession()">
+            <span class="new-chat-icon">+</span>
+            <span class="new-chat-text">NEW CHAT</span>
+          </button>
+        </div>
+        
         <?php
         $displayed_main_categories = 0;
         $category_order = ['Today', 'Yesterday', 'Last 7 Days', 'Last 1 Month', 'Older'];
@@ -374,47 +380,20 @@ if ($stmt_conv_list) {
 
     // Moved to global scope
     async function startNewChatSession() {
-      const searchInput = document.getElementById("userInput");
-      const initialView = document.querySelector(".initial-view");
-      const chatContainer = document.querySelector(".chat-container");
-      const chatSection = document.querySelector(".chat-section");
-
-      clearChatMessages();
-      if (searchInput) searchInput.value = '';
-      currentConversationId = null; // Reset client-side ID initially
-
-      console.log("Starting new chat session. Requesting new conversation_id from server.");
-
+      // Clear any active conversation from session
       try {
         const formData = new FormData();
-        formData.append('action', 'start_new_chat'); // Changed to start_new_chat
-        const response = await fetch('ai.php', {
+        formData.append('action', 'clear_active_conversation');
+        await fetch('ai.php', {
           method: 'POST',
           body: formData
         });
-        const result = await response.json();
-        if (result.status === 'success' && result.conversation_id) {
-          currentConversationId = result.conversation_id; // Set client-side ID to the new one
-          console.log("Server created new chat. New conversation_id:", currentConversationId, "Title:", result.title);
-          // Sidebar will update on next full load or if explicitly refreshed.
-          // The title of this new chat will be updated on the first message sent.
-        } else {
-          console.error("Failed to start new chat session on server:", result.message || "Unknown error. Full result:", result);
-          currentConversationId = null; // Ensure it's null on failure to prevent using stale ID
-        }
       } catch (error) {
-        console.error("Error calling start_new_chat:", error);
-        currentConversationId = null; // Ensure it's null on error
+        console.error("Error clearing active conversation:", error);
       }
-
-      if (initialView) {
-        initialView.style.opacity = "1";
-        initialView.style.transform = "translateY(0)";
-        initialView.style.display = "block";
-      }
-      if (chatContainer) chatContainer.style.display = "none";
-      if (chatSection) chatSection.classList.remove("chat-active");
-      if (searchInput) searchInput.focus();
+      
+      // Refresh the page to start completely fresh
+      window.location.reload();
     }
 
     // Moved to global scope
@@ -493,7 +472,7 @@ if ($stmt_conv_list) {
         return;
       }
 
-      let messageForAI = userOriginalMessage + ". This is the prompt. If the prompt is related to 'Medical Assistance', 'Mental Consultancy', or 'Greetings', then just respond to the prompt. Otherwise, show this message: 'Hi there! 👋 I'm here to help with Mental health support, and Physical health-related questions only. If you have other queries, please consult a medical expert or explore other features of MediAI. Thanks for understanding! 💙'";
+      let messageForAI = userOriginalMessage + ". This is the prompt. If the prompt is related to 'Any kind of Medical Assistance or 'Mental Consultancy', or 'Greetings', then just respond to the prompt. Otherwise, show this message: 'Hi there! 👋 I'm here to help with Mental health support, and Physical health-related questions only. If you have other queries, please consult a medical expert or explore other features of MediAI. Thanks for understanding! 💙'";
 
       console.log("Message for AI:", messageForAI);
 
@@ -517,23 +496,27 @@ if ($stmt_conv_list) {
 
       try {
         console.log("Attempting to fetch from OpenRouter API...");
+        
         const response = await fetch(
           "https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
-              Authorization: "Bearer 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",
+              "Authorization": "Bearer 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",
               "Content-Type": "application/json",
               "X-Title": "MediAI_Chat",
             },
             body: JSON.stringify({
-              model: "deepseek/deepseek-r1:free",
+              model: "microsoft/phi-3-mini-128k-instruct",
               messages: [{
                 role: "user",
                 content: messageForAI
               }],
+              max_tokens: 1000,
+              temperature: 0.7
             }),
           }
         );
+        
         console.log("OpenRouter API response status:", response.status);
 
         if (!response.ok) {

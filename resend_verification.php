@@ -1,6 +1,11 @@
 <?php
-session_start();
+require_once 'session_manager.php';
 require_once 'dbConnect.php';
+require_once 'email_config.php';
+
+// Start session with timeout management
+SessionManager::startSession();
+
 require 'vendor/autoload.php';
 
 // Check if user is coming from verify page
@@ -21,37 +26,13 @@ $stmt->bind_param("ss", $otp, $email);
 $stmt->execute();
 
 // Send verification email
-$mail = new PHPMailer\PHPMailer\PHPMailer(true);
+$email_sent = EmailConfig::sendVerificationEmail($email, $otp);
 
-try {
-    // Server settings
-    $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'your-email@gmail.com'; // Replace with your Gmail
-    $mail->Password = 'your-app-password'; // Replace with your app password
-    $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
-
-    // Recipients
-    $mail->setFrom('your-email@gmail.com', 'MediAI');
-    $mail->addAddress($email);
-
-    // Content
-    $mail->isHTML(true);
-    $mail->Subject = 'MediAI - New Verification Code';
-    $mail->Body = "
-        <h2>New Verification Code</h2>
-        <p>Your new verification code is: <strong>$otp</strong></p>
-        <p>Please enter this code on the verification page to complete your registration.</p>
-        <p>If you didn't request this code, please ignore this email.</p>
-    ";
-
-    $mail->send();
+if ($email_sent) {
     header('Location: verify.php?resent=1');
     exit();
-} catch (Exception $e) {
+} else {
     header('Location: verify.php?error=1');
     exit();
 }
-?> 
+?>
