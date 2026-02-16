@@ -522,6 +522,7 @@ This project is licensed under the **Proprietary License** - see the [LICENSE](L
 - **Documentation**: Check this README and inline code comments
 - **Issues**: Report bugs via GitHub Issues
 - **Discussions**: Join our GitHub Discussions
+<<<<<<< HEAD
 - **Email**: support@mediai.com
 
 ### 🌐 Connect With Us
@@ -535,6 +536,13 @@ This project is licensed under the **Proprietary License** - see the [LICENSE](L
 <div align="center">
 
 **🏥 Made with ❤️ for Healthcare Professionals Worldwide**
+=======
+- **Email**: arnab0574@gmail.com
+
+<div align="center">
+
+**🏥 Made for Healthcare Professionals Worldwide**
+>>>>>>> c00b1b6144bdcdde3eb6c8684f22f28e69123813
 
 [⬆️ Back to Top](#-mediai---ai-powered-healthcare-management-system)
 
